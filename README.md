@@ -1,24 +1,22 @@
 # Frobnicator (this is a template)
 
 ## Authors
-- Andrzej Głuszak (@agluszak on GitHub)
-- Linus Torvalds (@torvalds on GitHub)
+- Mikołaj Szkaradek (@Szkaradd on GitHub)
+- Agata Załęska (@agatazaleska on GitHub)
 
 ## Description
-Frobnicator is going to be a platformer game similar to Super Mario Bros made using Bevy game engine.
+Our project is going to be a chess game for 2 players with some cool animations made using Bevy game engine.
 
 ## Features
-- map generator
-- shooting
-- enemy AI
-- game state saving and loading
-- scores
+- Chess gui
+- Possibility to play with another player
+- Possibility to play with bot who will be getting knowledge from some chess API(optional)
 
 ## Plan
-In the first part we're going to implement the basics: movement, physics and shooting. The enemies will simply bounce from one edge of the platform to the other. There will be only a single map.
+In the first part we're going to implement the basic look of the board and moves of figures.
+This would let us play a game against another player.
 
-In the second part we're going to add random map generator, saving/loading, scores and a more sophisticated AI.
+In the second part we're going to add more animations to the game better interface and possibility to play with bot(optional)
 
 ## Libraries
-- Bevy
-- Serde (for serialization)
+- Bevy for animations and menu screens.
