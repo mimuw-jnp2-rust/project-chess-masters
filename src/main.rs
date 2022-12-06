@@ -74,6 +74,11 @@ impl Plugin for HelloPlugin {
 }
 
 fn main() {
+    let king = new_piece("King", 0, 0);
+    print_piece(&king);
+    let queen = new_piece("Queen", 2, 0);
+    print_piece(&queen);
+
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugin(HelloPlugin)
