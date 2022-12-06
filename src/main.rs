@@ -1,3 +1,39 @@
+// enum representing chess pieces with position
+#[derive(Debug)]
+enum Piece {
+    King { x: i32, y: i32 },
+    Queen { x: i32, y: i32 },
+    Rook { x: i32, y: i32 },
+    Bishop { x: i32, y: i32 },
+    Knight { x: i32, y: i32 },
+    Pawn { x: i32, y: i32 },
+}
+
+// piece constructor
+fn new_piece(piece: &str, x: i32, y: i32) -> Piece {
+    match piece {
+        "King" => Piece::King { x, y },
+        "Queen" => Piece::Queen { x, y },
+        "Rook" => Piece::Rook { x, y },
+        "Bishop" => Piece::Bishop { x, y },
+        "Knight" => Piece::Knight { x, y },
+        "Pawn" => Piece::Pawn { x, y },
+        _ => panic!("Invalid piece"),
+    }
+}
+
+// print piece
+fn print_piece(piece: &Piece) {
+    match piece {
+        Piece::King { x, y } => println!("King at ({}, {})", x, y),
+        Piece::Queen { x, y } => println!("Queen at ({}, {})", x, y),
+        Piece::Rook { x, y } => println!("Rook at ({}, {})", x, y),
+        Piece::Bishop { x, y } => println!("Bishop at ({}, {})", x, y),
+        Piece::Knight { x, y } => println!("Knight at ({}, {})", x, y),
+        Piece::Pawn { x, y } => println!("Pawn at ({}, {})", x, y),
+    }
+}
+
 use bevy::prelude::*;
 
 #[derive(Component)]
