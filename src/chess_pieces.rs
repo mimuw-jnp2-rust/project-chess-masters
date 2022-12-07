@@ -1,17 +1,75 @@
 use bevy::prelude::Component;
 
-#[derive(Debug, Component)]
+/// The color of a piece.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub enum Color {
+    White,
+    Black,
+}
+
+impl core::fmt::Display for Color {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> Result<(), core::fmt::Error> {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::White => "White",
+                Self::Black => "Black",
+            }
+        )
+    }
+}
+
+#[derive(Component, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Piece {
-    King { x: i32, y: i32, color: char },
-    Queen { x: i32, y: i32, color: char },
-    Rook { x: i32, y: i32, color: char },
-    Bishop { x: i32, y: i32, color: char },
-    Knight { x: i32, y: i32, color: char },
-    Pawn { x: i32, y: i32, color: char },
+    King { x: i32, y: i32, color: Color },
+    Queen { x: i32, y: i32, color: Color },
+    Rook { x: i32, y: i32, color: Color },
+    Bishop { x: i32, y: i32, color: Color },
+    Knight { x: i32, y: i32, color: Color },
+    Pawn { x: i32, y: i32, color: Color },
+}
+
+impl core::fmt::Display for Piece {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> Result<(), core::fmt::Error> {
+        write!(
+            f,
+            "{}",
+            match self.get_color() {
+                Color::Black => match self {
+                    Self::King { .. } => "♔",
+                    Self::Queen { .. } => "♕",
+                    Self::Rook { .. } => "♖",
+                    Self::Knight { .. } => "♘",
+                    Self::Bishop { .. } => "♗",
+                    Self::Pawn { .. } => "♙",
+                },
+                Color::White => match self {
+                    Self::King { .. } => "♚",
+                    Self::Queen { .. } => "♛",
+                    Self::Rook { .. } => "♜",
+                    Self::Knight { .. } => "♞",
+                    Self::Bishop { .. } => "♝",
+                    Self::Pawn { .. } => "♟︎",
+                },
+            }
+        )
+    }
 }
 
 impl Piece {
-    pub fn new(piece: &str, x: i32, y: i32, color: char) -> Self {
+    pub fn get_color(&self) -> Color {
+        match self {
+            Self::King { x: _, y: _, color }
+            | Self::Queen { x: _, y: _, color }
+            | Self::Rook { x: _, y: _, color }
+            | Self::Bishop { x: _, y: _, color }
+            | Self::Knight { x: _, y: _, color }
+            | Self::Pawn { x: _, y: _, color } => *color,
+        }
+    }
+
+    pub fn new(piece: &str, x: i32, y: i32, color: Color) -> Self {
         match piece {
             "King" => Piece::King { x, y, color },
             "Queen" => Piece::Queen { x, y, color },
@@ -23,7 +81,8 @@ impl Piece {
         }
     }
 
-    pub fn print(&self) {
+    #[allow(dead_code)]
+    pub fn print_piece(&self) {
         match &self {
             Piece::King { x, y, .. } => println!("King at ({}, {})", x, y),
             Piece::Queen { x, y, .. } => println!("Queen at ({}, {})", x, y),
@@ -34,6 +93,7 @@ impl Piece {
         }
     }
 
+    #[allow(dead_code)]
     pub fn get_type(&self) -> &'static str {
         match self {
             Piece::King { .. } => "King",

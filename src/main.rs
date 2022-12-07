@@ -9,9 +9,9 @@ mod chess_pieces;
 pub struct HelloPlugin;
 
 fn add_pieces(mut commands: Commands) {
-    commands.spawn(Piece::new("Pawn", 1, 1, 'b'));
-    commands.spawn(Piece::new("King", 2, 1, 'w'));
-    commands.spawn(Piece::new("Bishop", 3, 1, 'b'));
+    commands.spawn(Piece::new("Pawn", 1, 1, chess_pieces::Color::Black));
+    commands.spawn(Piece::new("King", 2, 1, chess_pieces::Color::White));
+    commands.spawn(Piece::new("Bishop", 3, 1, chess_pieces::Color::Black));
 }
 
 #[derive(Resource)]
@@ -20,14 +20,14 @@ struct GreetTimer(Timer);
 fn greet_pieces(time: Res<Time>, mut timer: ResMut<GreetTimer>, query: Query<&Piece>) {
     if timer.0.tick(time.delta()).just_finished() {
         for piece in query.iter() {
-            println!("hello {}!", piece.get_type());
+            println!("hello {}!", &piece);
         }
     }
 }
 
 impl Plugin for HelloPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(GreetTimer(Timer::from_seconds(10.0, TimerMode::Repeating)))
+        app.insert_resource(GreetTimer(Timer::from_seconds(4.0, TimerMode::Repeating)))
             .add_startup_system(add_pieces)
             .add_system(greet_pieces);
     }
