@@ -23,27 +23,23 @@ impl Piece {
 
     pub fn print(&self) {
         match &self {
-            Piece::King { x, y, color } => println!("King at ({}, {})", x, y),
-            Piece::Queen { x, y, color } => println!("Queen at ({}, {})", x, y),
-            Piece::Rook { x, y, color } => println!("Rook at ({}, {})", x, y),
-            Piece::Bishop { x, y, color } => println!("Bishop at ({}, {})", x, y),
-            Piece::Knight { x, y, color } => println!("Knight at ({}, {})", x, y),
-            Piece::Pawn { x, y, color } => println!("Pawn at ({}, {})", x, y),
+            Piece::King { x, y, .. } => println!("King at ({}, {})", x, y),
+            Piece::Queen { x, y, .. } => println!("Queen at ({}, {})", x, y),
+            Piece::Rook { x, y, .. } => println!("Rook at ({}, {})", x, y),
+            Piece::Bishop { x, y, .. } => println!("Bishop at ({}, {})", x, y),
+            Piece::Knight { x, y, .. } => println!("Knight at ({}, {})", x, y),
+            Piece::Pawn { x, y, .. } => println!("Pawn at ({}, {})", x, y),
         }
     }
 
     pub fn get_type(&self) -> &'static str {
         match self {
-            Self::King(_, _, _) => "King",
-            Piece::Queen {
-                x: _,
-                y: _,
-                color: _,
-            } => "Queen",
-            Piece::Rook { x, y, color } => "Rook",
-            Piece::Bishop { x, y, color } => "Bishop",
-            Piece::Knight { x, y, color } => "Knight",
-            Piece::Pawn { x, y, color } => "Pawn",
+            Piece::King { .. } => "King",
+            Piece::Queen { .. } => "Queen",
+            Piece::Rook { .. } => "Rook",
+            Piece::Bishop { .. } => "Bishop",
+            Piece::Knight { .. } => "Knight",
+            Piece::Pawn { .. } => "Pawn",
         }
     }
 }
