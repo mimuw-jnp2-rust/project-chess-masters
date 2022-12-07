@@ -2,30 +2,22 @@
 use crate::chess_pieces::*;
 use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 
-fn hello_world() {
-    println!("hello world!");
-}
-
 pub struct HelloPlugin;
 
 impl Plugin for HelloPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(add_pieces)
-            .add_system(hello_world)
+        app.insert_resource(GreetTimer(Timer::from_seconds(10.0, TimerMode::Repeating)))
+            .add_startup_system(add_pieces)
             .add_system(greet_pieces);
     }
 }
 
-fn add_pieces(mut commands: Commands) {
-    commands.spawn(Piece::new("Pawn", 1, 1));
-    commands.spawn(Piece::new("King", 2, 1));
-    commands.spawn(Piece::new("Bishop", 3, 1));
-}
-
-fn greet_pieces(query: Query<&Piece>) {
-    for piece in query.iter() {
-        println!("hello {}!", piece.get_type());
-    }
+fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands.spawn(Camera2dBundle::default());
+    commands.spawn(SpriteBundle {
+        texture: asset_server.load("board.png"),
+        ..default()
+    });
 }
 
 fn main() {
@@ -35,7 +27,16 @@ fn main() {
     print_piece(&queen);
 
     App::new()
-        .add_plugins(DefaultPlugins)
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            window: WindowDescriptor {
+                title: "Chess!".to_string(),
+                width: 800.,
+                height: 800.,
+                ..default()
+            },
+            ..default()
+        }))
         .add_plugin(HelloPlugin)
+        .add_startup_system(setup)
         .run();
 }
