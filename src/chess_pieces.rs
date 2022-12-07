@@ -1,4 +1,6 @@
-#[derive(Debug)]
+use bevy::prelude::Component;
+
+#[derive(Debug, Component)]
 pub enum Piece {
     King { x: i32, y: i32, color: char },
     Queen { x: i32, y: i32, color: char },

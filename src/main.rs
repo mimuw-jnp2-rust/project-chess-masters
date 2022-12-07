@@ -1,8 +1,27 @@
 // enum representing chess pieces with position
-use crate::chess_pieces::*;
-use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
+use bevy::prelude::*;
+use chess_pieces::*;
+
+mod chess_pieces;
 
 pub struct HelloPlugin;
+
+fn add_pieces(mut commands: Commands) {
+    commands.spawn(Piece::new("Pawn", 1, 1, 'b'));
+    commands.spawn(Piece::new("King", 2, 1, 'w'));
+    commands.spawn(Piece::new("Bishop", 3, 1, 'b'));
+}
+
+#[derive(Resource)]
+struct GreetTimer(Timer);
+
+fn greet_pieces(time: Res<Time>, mut timer: ResMut<GreetTimer>, query: Query<&Piece>) {
+    if timer.0.tick(time.delta()).just_finished() {
+        for piece in query.iter() {
+            println!("hello {}!", piece.get_type());
+        }
+    }
+}
 
 impl Plugin for HelloPlugin {
     fn build(&self, app: &mut App) {
@@ -21,11 +40,6 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 fn main() {
-    let king = new_piece("King", 0, 0);
-    print_piece(&king);
-    let queen = new_piece("Queen", 2, 0);
-    print_piece(&queen);
-
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             window: WindowDescriptor {
