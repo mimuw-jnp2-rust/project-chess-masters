@@ -2,12 +2,12 @@ use bevy::prelude::Component;
 
 /// The color of a piece.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub enum Color {
+pub enum PieceColor {
     White,
     Black,
 }
 
-impl core::fmt::Display for Color {
+impl core::fmt::Display for PieceColor {
     fn fmt(&self, f: &mut core::fmt::Formatter) -> Result<(), core::fmt::Error> {
         write!(
             f,
@@ -22,12 +22,12 @@ impl core::fmt::Display for Color {
 
 #[derive(Component, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Piece {
-    King { x: i32, y: i32, color: Color },
-    Queen { x: i32, y: i32, color: Color },
-    Rook { x: i32, y: i32, color: Color },
-    Bishop { x: i32, y: i32, color: Color },
-    Knight { x: i32, y: i32, color: Color },
-    Pawn { x: i32, y: i32, color: Color },
+    King { x: i32, y: i32, color: PieceColor },
+    Queen { x: i32, y: i32, color: PieceColor },
+    Rook { x: i32, y: i32, color: PieceColor },
+    Bishop { x: i32, y: i32, color: PieceColor },
+    Knight { x: i32, y: i32, color: PieceColor },
+    Pawn { x: i32, y: i32, color: PieceColor },
 }
 
 impl core::fmt::Display for Piece {
@@ -36,7 +36,7 @@ impl core::fmt::Display for Piece {
             f,
             "{}",
             match self.get_color() {
-                Color::Black => match self {
+                PieceColor::Black => match self {
                     Self::King { .. } => "♔",
                     Self::Queen { .. } => "♕",
                     Self::Rook { .. } => "♖",
@@ -44,7 +44,7 @@ impl core::fmt::Display for Piece {
                     Self::Bishop { .. } => "♗",
                     Self::Pawn { .. } => "♙",
                 },
-                Color::White => match self {
+                PieceColor::White => match self {
                     Self::King { .. } => "♚",
                     Self::Queen { .. } => "♛",
                     Self::Rook { .. } => "♜",
@@ -58,7 +58,7 @@ impl core::fmt::Display for Piece {
 }
 
 impl Piece {
-    pub fn get_color(&self) -> Color {
+    pub fn get_color(&self) -> PieceColor {
         match self {
             Self::King { x: _, y: _, color }
             | Self::Queen { x: _, y: _, color }
@@ -69,7 +69,7 @@ impl Piece {
         }
     }
 
-    pub fn new(piece: &str, x: i32, y: i32, color: Color) -> Self {
+    pub fn new(piece: &str, x: i32, y: i32, color: PieceColor) -> Self {
         match piece {
             "King" => Piece::King { x, y, color },
             "Queen" => Piece::Queen { x, y, color },
