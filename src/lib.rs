@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use coordinates::*;
+// use coordinates::*;
 pub mod coordinates;
 
 pub const WINDOW_WIDTH: f32 = 800.0;
