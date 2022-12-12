@@ -22,12 +22,12 @@ impl core::fmt::Display for PieceColor {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum PieceType {
-    King { x: u32, y: u32, color: PieceColor },
-    Queen { x: u32, y: u32, color: PieceColor },
-    Rook { x: u32, y: u32, color: PieceColor },
-    Bishop { x: u32, y: u32, color: PieceColor },
-    Knight { x: u32, y: u32, color: PieceColor },
-    Pawn { x: u32, y: u32, color: PieceColor },
+    King { x: i32, y: i32, color: PieceColor },
+    Queen { x: i32, y: i32, color: PieceColor },
+    Rook { x: i32, y: i32, color: PieceColor },
+    Bishop { x: i32, y: i32, color: PieceColor },
+    Knight { x: i32, y: i32, color: PieceColor },
+    Pawn { x: i32, y: i32, color: PieceColor },
 }
 
 impl core::fmt::Display for PieceType {
@@ -69,7 +69,7 @@ impl PieceType {
         }
     }
 
-    pub fn get_coordinates(&self) -> (u32, u32) {
+    pub fn get_coordinates(&self) -> (i32, i32) {
         match self {
             Self::King { x, y, .. }
             | Self::Queen { x, y, .. }
@@ -80,7 +80,7 @@ impl PieceType {
         }
     }
 
-    pub fn new(piece: &str, x: u32, y: u32, color: PieceColor) -> Self {
+    pub fn new(piece: &str, x: i32, y: i32, color: PieceColor) -> Self {
         match piece {
             "King" => PieceType::King { x, y, color },
             "Queen" => PieceType::Queen { x, y, color },

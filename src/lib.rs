@@ -49,6 +49,11 @@ pub struct GameTextures {
     pub black_king: Handle<Image>,
 }
 
+#[derive(Resource, Default)]
+pub struct Turn {
+    pub white: bool,
+}
+
 /*pub fn change_color_touching_buttons(
     //mut commands: Commands,
     mut interaction_query: Query<

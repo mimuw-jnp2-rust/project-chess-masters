@@ -36,6 +36,8 @@ fn setup(
         black_king: asset_server.load(BLACK_KING_SPRITE),
     });
 
+    commands.insert_resource(Turn { white: true });
+
     /*let window = windows.get_primary_mut().unwrap();
     let (width, height) = window.physical_size();*/
 }
@@ -62,6 +64,9 @@ pub fn input_handling(
 
     for event in button_evr.iter() {
         if let ButtonState::Pressed = event.state {
+            if event.button != MouseButton::Left {
+                continue;
+            }
             let position = window.cursor_position();
             if let Some(pos) = position {
                 let clicked_coords = mouse_pos_to_coordinates(pos.x, pos.y);
@@ -71,7 +76,7 @@ pub fn input_handling(
                 );
                 for (mut image, piece) in query.iter_mut() {
                     let (x, y) = piece.piece_type.get_coordinates();
-                    if x == clicked_coords.x as u32 && y == clicked_coords.y as u32 {
+                    if x == clicked_coords.x && y == clicked_coords.y {
                         *image = game_textures.white_king.clone();
                     }
                 }
