@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use bevy::winit::WinitSettings;
 use chess_masters::chess_pieces::*;
 use chess_masters::components::Piece;
+use chess_masters::coordinates::mouse_pos_to_coordinates;
 use chess_masters::field::Field;
 use chess_masters::*;
 // use chess_pieces::*;
@@ -50,7 +51,12 @@ fn piece_movement_system(mut query: Query<(&mut Transform, &Piece), With<Sprite>
     }
 }
 
-pub fn input_handling(windows: Res<Windows>, mut button_evr: EventReader<MouseButtonInput>) {
+pub fn input_handling(
+    windows: Res<Windows>,
+    mut button_evr: EventReader<MouseButtonInput>,
+    mut query: Query<(&mut Handle<Image>, &Piece), With<Sprite>>,
+    game_textures: Res<GameTextures>,
+) {
     let window = windows.get_primary().unwrap();
     // print window size
 
@@ -58,7 +64,17 @@ pub fn input_handling(windows: Res<Windows>, mut button_evr: EventReader<MouseBu
         if let ButtonState::Pressed = event.state {
             let position = window.cursor_position();
             if let Some(pos) = position {
-                println!("Mouse button pressed: {:?} at {}", event.button, pos);
+                let clicked_coords = mouse_pos_to_coordinates(pos.x, pos.y);
+                println!(
+                    "Mouse button pressed: {:?} at {}",
+                    event.button, &clicked_coords
+                );
+                for (mut image, piece) in query.iter_mut() {
+                    let (x, y) = piece.piece_type.get_coordinates();
+                    if x == clicked_coords.x as u32 && y == clicked_coords.y as u32 {
+                        *image = game_textures.white_king.clone();
+                    }
+                }
             }
         }
     }

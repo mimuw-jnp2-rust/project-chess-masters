@@ -68,8 +68,8 @@ pub fn board_spawn_system(mut commands: Commands, game_textures: Res<GameTexture
                     })
                     .insert(Field {
                         coordinates: Coordinates {
-                            x: i as i32 + 1,
-                            y: j as i32 + 1,
+                            x: j as i32 + 1,
+                            y: i as i32 + 1,
                         },
                         color: field_color,
                         piece: None,
@@ -88,7 +88,7 @@ pub fn board_spawn_system(mut commands: Commands, game_textures: Res<GameTexture
                         ..default()
                     })
                     .insert(components::Piece {
-                        piece_type: PieceType::new("Pawn", i + 1, j + 1, PieceColor::White),
+                        piece_type: PieceType::new("Pawn", j + 1, i + 1, PieceColor::White),
                     });
             }
             x += FIELD_SIZE;
