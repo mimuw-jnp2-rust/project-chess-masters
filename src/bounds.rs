@@ -15,7 +15,7 @@ impl Bounds2 {
     }
 }
 
-fn spawn_field(
+/*fn spawn_field(
     parent: &mut ChildBuilder,
     size: f32,
     x: f32,
@@ -64,4 +64,4 @@ pub fn spawn_fields(parent: &mut ChildBuilder, size: f32) {
         x = start_x;
         y += FIELD_SIZE;
     }
-}
+}*/

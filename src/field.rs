@@ -1,3 +1,4 @@
+use crate::chess_pieces::*;
 use crate::coordinates::*;
 use bevy::prelude::Component;
 
@@ -10,8 +11,9 @@ pub enum FieldColor {
 
 #[derive(Debug, Component)]
 pub struct Field {
-    coordinates: Coordinates,
-    color: FieldColor,
+    pub coordinates: Coordinates,
+    pub color: FieldColor,
+    pub piece: Option<PieceType>,
 }
 
 impl Field {}

@@ -20,17 +20,17 @@ impl core::fmt::Display for PieceColor {
     }
 }
 
-#[derive(Component, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub enum Piece {
-    King { x: i32, y: i32, color: PieceColor },
-    Queen { x: i32, y: i32, color: PieceColor },
-    Rook { x: i32, y: i32, color: PieceColor },
-    Bishop { x: i32, y: i32, color: PieceColor },
-    Knight { x: i32, y: i32, color: PieceColor },
-    Pawn { x: i32, y: i32, color: PieceColor },
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub enum PieceType {
+    King { x: u32, y: u32, color: PieceColor },
+    Queen { x: u32, y: u32, color: PieceColor },
+    Rook { x: u32, y: u32, color: PieceColor },
+    Bishop { x: u32, y: u32, color: PieceColor },
+    Knight { x: u32, y: u32, color: PieceColor },
+    Pawn { x: u32, y: u32, color: PieceColor },
 }
 
-impl core::fmt::Display for Piece {
+impl core::fmt::Display for PieceType {
     fn fmt(&self, f: &mut core::fmt::Formatter) -> Result<(), core::fmt::Error> {
         write!(
             f,
@@ -57,7 +57,7 @@ impl core::fmt::Display for Piece {
     }
 }
 
-impl Piece {
+impl PieceType {
     pub fn get_color(&self) -> PieceColor {
         match self {
             Self::King { x: _, y: _, color }
@@ -69,14 +69,25 @@ impl Piece {
         }
     }
 
-    pub fn new(piece: &str, x: i32, y: i32, color: PieceColor) -> Self {
+    pub fn get_coordinates(&self) -> (u32, u32) {
+        match self {
+            Self::King { x, y, .. }
+            | Self::Queen { x, y, .. }
+            | Self::Rook { x, y, .. }
+            | Self::Bishop { x, y, .. }
+            | Self::Knight { x, y, .. }
+            | Self::Pawn { x, y, .. } => (*x, *y),
+        }
+    }
+
+    pub fn new(piece: &str, x: u32, y: u32, color: PieceColor) -> Self {
         match piece {
-            "King" => Piece::King { x, y, color },
-            "Queen" => Piece::Queen { x, y, color },
-            "Rook" => Piece::Rook { x, y, color },
-            "Bishop" => Piece::Bishop { x, y, color },
-            "Knight" => Piece::Knight { x, y, color },
-            "Pawn" => Piece::Pawn { x, y, color },
+            "King" => PieceType::King { x, y, color },
+            "Queen" => PieceType::Queen { x, y, color },
+            "Rook" => PieceType::Rook { x, y, color },
+            "Bishop" => PieceType::Bishop { x, y, color },
+            "Knight" => PieceType::Knight { x, y, color },
+            "Pawn" => PieceType::Pawn { x, y, color },
             _ => panic!("Invalid piece"),
         }
     }
@@ -84,24 +95,24 @@ impl Piece {
     #[allow(dead_code)]
     pub fn print_piece(&self) {
         match &self {
-            Piece::King { x, y, .. } => println!("King at ({}, {})", x, y),
-            Piece::Queen { x, y, .. } => println!("Queen at ({}, {})", x, y),
-            Piece::Rook { x, y, .. } => println!("Rook at ({}, {})", x, y),
-            Piece::Bishop { x, y, .. } => println!("Bishop at ({}, {})", x, y),
-            Piece::Knight { x, y, .. } => println!("Knight at ({}, {})", x, y),
-            Piece::Pawn { x, y, .. } => println!("Pawn at ({}, {})", x, y),
+            PieceType::King { x, y, .. } => println!("King at ({}, {})", x, y),
+            PieceType::Queen { x, y, .. } => println!("Queen at ({}, {})", x, y),
+            PieceType::Rook { x, y, .. } => println!("Rook at ({}, {})", x, y),
+            PieceType::Bishop { x, y, .. } => println!("Bishop at ({}, {})", x, y),
+            PieceType::Knight { x, y, .. } => println!("Knight at ({}, {})", x, y),
+            PieceType::Pawn { x, y, .. } => println!("Pawn at ({}, {})", x, y),
         }
     }
 
     #[allow(dead_code)]
     pub fn get_type(&self) -> &'static str {
         match self {
-            Piece::King { .. } => "King",
-            Piece::Queen { .. } => "Queen",
-            Piece::Rook { .. } => "Rook",
-            Piece::Bishop { .. } => "Bishop",
-            Piece::Knight { .. } => "Knight",
-            Piece::Pawn { .. } => "Pawn",
+            PieceType::King { .. } => "King",
+            PieceType::Queen { .. } => "Queen",
+            PieceType::Rook { .. } => "Rook",
+            PieceType::Bishop { .. } => "Bishop",
+            PieceType::Knight { .. } => "Knight",
+            PieceType::Pawn { .. } => "Pawn",
         }
     }
 }

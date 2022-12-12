@@ -6,8 +6,8 @@ use std::ops::Add;
 #[cfg_attr(feature = "debug", derive(bevy_inspector_egui::Inspectable))]
 #[derive(Debug, Default, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Component)]
 pub struct Coordinates {
-    pub x: i8, // or u16? i is for moves simulation
-    pub y: i8,
+    pub x: u32, // or u16? i is for moves simulation
+    pub y: u32,
 }
 
 impl Add for Coordinates {
