@@ -77,6 +77,9 @@ pub fn input_handling(
                 );
                 for (mut image, piece) in query.iter_mut() {
                     let (x, y) = piece.piece_type.get_coordinates();
+                    // Koncepcyjnie myślę, że chcielibyśmy po kliknięciu gdziekolwiek na planszy
+                    // wyłączyć wszystkie podświetlenia, poza tymi co opisują ostatni ruch (jeśli był)
+                    // tzn. pola skąd i dokąd ruszyła figura powinny się świecić.
                     if x == clicked_coords.x && y == clicked_coords.y {
                         if *image == game_textures.bordered_black_bishop {
                             *image = game_textures.black_bishop.clone();
