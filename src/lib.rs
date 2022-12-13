@@ -34,6 +34,10 @@ pub const BLACK_QUEEN_SPRITE: &str = "128px/b_queen_png_shadow_128px.png";
 pub const WHITE_KING_SPRITE: &str = "128px/w_king_png_shadow_128px.png";
 pub const BLACK_KING_SPRITE: &str = "128px/b_king_png_shadow_128px.png";
 
+// Pomysł - tablica która na pozycjach nieparzystych ma
+// figurę z ramką, a na pozycjach parzystych nie ma ramki
+// W ten sposób wystarczy sprawdzić przy kliknięciu czy i % 2 == 0
+// jesli tak to bierzemy z pozycji i+1 asset z ramką
 #[derive(Resource, Default)]
 pub struct GameTextures {
     pub white_pawn: Handle<Image>,
