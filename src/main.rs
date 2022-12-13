@@ -1,10 +1,10 @@
 use bevy::input::{mouse::*, ButtonState};
 use bevy::prelude::*;
 use bevy::winit::WinitSettings;
-use chess_masters::chess_pieces::*;
+// use chess_masters::chess_pieces::*;
 use chess_masters::components::Piece;
 use chess_masters::coordinates::mouse_pos_to_coordinates;
-use chess_masters::field::Field;
+// use chess_masters::field::Field;
 use chess_masters::*;
 // use chess_pieces::*;
 // use coordinates::*;

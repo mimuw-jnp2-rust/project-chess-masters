@@ -1,6 +1,8 @@
 // coordinates.rs
 use crate::BOARD_SIZE;
 use crate::FIELD_SIZE;
+use crate::WINDOW_HEIGHT;
+use crate::WINDOW_WIDTH;
 use bevy::prelude::*;
 use std::fmt::{self, Display, Formatter};
 use std::ops::Add;
@@ -37,8 +39,8 @@ impl Display for Coordinates {
 }
 
 pub fn mouse_pos_to_coordinates(x: f32, y: f32) -> Coordinates {
-    let new_x = x - 400.0;
-    let new_y = y - 400.0;
+    let new_x = x - WINDOW_WIDTH / 2.0;
+    let new_y = y - WINDOW_HEIGHT / 2.0;
     Coordinates {
         x: ((new_x + 5.0 * FIELD_SIZE) as i32) / FIELD_SIZE as i32,
         y: ((new_y + 5.0 * FIELD_SIZE) as i32) / FIELD_SIZE as i32,
