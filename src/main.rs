@@ -28,6 +28,7 @@ fn setup(
         black_knight: asset_server.load(BLACK_KNIGHT_SPRITE),
         white_bishop: asset_server.load(WHITE_BISHOP_SPRITE),
         black_bishop: asset_server.load(BLACK_BISHOP_SPRITE),
+        bordered_black_bishop: asset_server.load(BORDERED_BLACK_BISHOP_SPRITE),
         white_rook: asset_server.load(WHITE_ROOK_SPRITE),
         black_rook: asset_server.load(BLACK_ROOK_SPRITE),
         white_queen: asset_server.load(WHITE_QUEEN_SPRITE),
@@ -77,7 +78,11 @@ pub fn input_handling(
                 for (mut image, piece) in query.iter_mut() {
                     let (x, y) = piece.piece_type.get_coordinates();
                     if x == clicked_coords.x && y == clicked_coords.y {
-                        *image = game_textures.white_king.clone();
+                        if *image == game_textures.bordered_black_bishop {
+                            *image = game_textures.black_bishop.clone();
+                        } else {
+                            *image = game_textures.bordered_black_bishop.clone();
+                        }
                     }
                 }
             }

@@ -26,6 +26,7 @@ pub const WHITE_KNIGHT_SPRITE: &str = "128px/w_knight_png_shadow_128px.png";
 pub const BLACK_KNIGHT_SPRITE: &str = "128px/b_knight_png_shadow_128px.png";
 pub const WHITE_BISHOP_SPRITE: &str = "128px/w_bishop_png_shadow_128px.png";
 pub const BLACK_BISHOP_SPRITE: &str = "128px/b_bishop_png_shadow_128px.png";
+pub const BORDERED_BLACK_BISHOP_SPRITE: &str = "128px/border-bishop.png";
 pub const WHITE_ROOK_SPRITE: &str = "128px/w_rook_png_shadow_128px.png";
 pub const BLACK_ROOK_SPRITE: &str = "128px/b_rook_png_shadow_128px.png";
 pub const WHITE_QUEEN_SPRITE: &str = "128px/w_queen_png_shadow_128px.png";
@@ -41,6 +42,7 @@ pub struct GameTextures {
     pub black_knight: Handle<Image>,
     pub white_bishop: Handle<Image>,
     pub black_bishop: Handle<Image>,
+    pub bordered_black_bishop: Handle<Image>,
     pub white_rook: Handle<Image>,
     pub black_rook: Handle<Image>,
     pub white_queen: Handle<Image>,
