@@ -128,42 +128,27 @@ fn piece_movement_system(mut query: Query<(&mut Transform, &Piece), With<Sprite>
     }
 }
 
-// podzielić na 2 funkcje: dla figur i dla pól osobne
-pub fn input_handling(
+pub fn clear_board() {}
+
+pub fn border_piece_on_click(
     windows: Res<Windows>,
     mut button_evr: EventReader<MouseButtonInput>,
     mut piece_query: Query<(&mut Handle<Image>, &mut Piece), With<Sprite>>,
-    mut field_query: Query<(&mut Sprite, &Field), With<Sprite>>,
     game_textures: Res<GameTextures>,
 ) {
     let window = windows.get_primary().unwrap();
-    // print window size
 
     for event in button_evr.iter() {
         if let ButtonState::Pressed = event.state {
             if event.button != MouseButton::Left {
                 continue;
             }
-            for (mut sprite_field, field) in field_query.iter_mut() {
-                match field.color {
-                    field::FieldColor::White => (*sprite_field).color = WHITE_FIELD,
-                    field::FieldColor::Black => (*sprite_field).color = BLACK_FIELD,
-                };
-            }
 
             let position = window.cursor_position();
             if let Some(pos) = position {
                 let clicked_coords = mouse_pos_to_coordinates(pos.x, pos.y);
-                println!(
-                    "Mouse button pressed: {:?} at {}",
-                    event.button, &clicked_coords
-                );
                 for (mut image, mut piece) in piece_query.iter_mut() {
-                    let coords = piece.coordinates;
-                    // Koncepcyjnie myślę, że chcielibyśmy po kliknięciu gdziekolwiek na planszy
-                    // wyłączyć wszystkie podświetlenia, poza tymi co opisują ostatni ruch (jeśli był)
-                    // tzn. pola skąd i dokąd ruszyła figura powinny się świecić.00
-                    if coords == clicked_coords {
+                    if piece.coordinates == clicked_coords {
                         if piece.border {
                             (*piece).border = false;
                             *image = get_image(&piece, &game_textures);
@@ -171,13 +156,49 @@ pub fn input_handling(
                             (*piece).border = true;
                             *image = get_image(&piece, &game_textures);
                         }
+                    } else {
+                        (*piece).border = false;
+                        *image = get_image(&piece, &game_textures);
                     }
+                }
+            }
+        }
+    }
+}
 
-                    let possible_moves = get_possible_moves(piece.piece_type, &clicked_coords);
-                    if piece.coordinates == clicked_coords {
+// podzielić na 2 funkcje: dla figur i dla pól osobne
+pub fn highlight_moves_on_click(
+    windows: Res<Windows>,
+    mut button_evr: EventReader<MouseButtonInput>,
+    mut field_query: Query<(&mut Sprite, &Field), With<Sprite>>,
+    game_state: Res<GameState>,
+) {
+    let window = windows.get_primary().unwrap();
+
+    for event in button_evr.iter() {
+        if let ButtonState::Pressed = event.state {
+            if event.button != MouseButton::Left {
+                continue;
+            }
+
+            // reset pól
+            for (mut sprite_field, field) in field_query.iter_mut() {
+                match field.color {
+                    field::FieldColor::White => (*sprite_field).color = WHITE_FIELD,
+                    field::FieldColor::Black => (*sprite_field).color = BLACK_FIELD,
+                };
+            }
+
+            if let Some(pos) = window.cursor_position() {
+                let clicked_coords = mouse_pos_to_coordinates(pos.x, pos.y);
+                println!("clicked_coords = {}", clicked_coords);
+
+                if let Some(clicked_field) = &game_state.board.get_field(clicked_coords) {
+                    if let Some(piece) = &clicked_field.piece {
+                        let possible_moves = get_possible_moves(piece.piece_type, &clicked_coords);
                         for (mut sprite_field, field) in field_query.iter_mut() {
                             if possible_moves.contains(&field.coordinates) {
-                                println!("possible coords = {}", &field.coordinates);
+                                //println!("possible coords = {}", &field.coordinates);
                                 match field.color {
                                     field::FieldColor::White => (*sprite_field).color = LIGHT_GRAY,
                                     field::FieldColor::Black => (*sprite_field).color = DARK_GRAY,
@@ -207,6 +228,7 @@ fn main() {
         .insert_resource(WinitSettings::desktop_app())
         .add_startup_system(setup)
         //.add_system(piece_movement_system)
-        .add_system(input_handling)
+        .add_system(highlight_moves_on_click)
+        .add_system(border_piece_on_click)
         .run();
 }
