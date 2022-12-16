@@ -13,7 +13,7 @@ pub enum FieldColor {
 pub struct Field {
     pub coordinates: Coordinates,
     pub color: FieldColor,
-    pub piece: Option<PieceType>,
+    pub piece: Option<Piece>,
 }
 
 impl Field {}

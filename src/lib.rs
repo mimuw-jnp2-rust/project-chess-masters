@@ -1,11 +1,15 @@
 use bevy::prelude::*;
+use chess_pieces::PieceType;
 use coordinates::Coordinates;
+use std::collections::HashMap;
+
 // use coordinates::*;
 pub mod board;
 pub mod chess_pieces;
 pub mod components;
 pub mod coordinates;
 pub mod field;
+pub mod moves;
 
 pub const WINDOW_WIDTH: f32 = 800.0;
 pub const WINDOW_HEIGHT: f32 = 800.0;
@@ -17,42 +21,42 @@ pub const PRESSED_BUTTON: Color = Color::rgb(0.35, 0.75, 0.35);
 
 pub const WHITE_BUTTON: Color = Color::rgb(0.9, 0.9, 0.9);
 pub const BLACK_BUTTON: Color = Color::rgb(0.1, 0.1, 0.1);
+pub const DARK_GRAY: Color = Color::rgb(80.0 / 255.0, 80.0 / 255.0, 80.0 / 255.0);
+pub const LIGHT_GRAY: Color = Color::rgb(150.0 / 255.0, 150.0 / 255.0, 150.0 / 255.0);
 pub const RED_BUTTON: Color = Color::rgb(0.9, 0.1, 0.1);
 pub const SADDLE_BROWN: Color = Color::rgb(59.0 / 255.0, 26.0 / 255.0, 14.0 / 255.0);
 
 pub const WHITE_PAWN_SPRITE: &str = "128px/w_pawn_png_shadow_128px.png";
+pub const BORDERED_WHITE_PAWN_SPRITE: &str = "128px/w_pawn_bordered.png";
 pub const BLACK_PAWN_SPRITE: &str = "128px/b_pawn_png_shadow_128px.png";
+pub const BORDERED_BLACK_PAWN_SPRITE: &str = "128px/b_pawn_bordered.png";
 pub const WHITE_KNIGHT_SPRITE: &str = "128px/w_knight_png_shadow_128px.png";
+pub const BORDERED_WHITE_KNIGHT_SPRITE: &str = "128px/w_knight_bordered.png";
 pub const BLACK_KNIGHT_SPRITE: &str = "128px/b_knight_png_shadow_128px.png";
+pub const BORDERED_BLACK_KNIGHT_SPRITE: &str = "128px/b_knight_bordered.png";
 pub const WHITE_BISHOP_SPRITE: &str = "128px/w_bishop_png_shadow_128px.png";
+pub const BORDERED_WHITE_BISHOP_SPRITE: &str = "128px/w_bishop_bordered.png";
 pub const BLACK_BISHOP_SPRITE: &str = "128px/b_bishop_png_shadow_128px.png";
-pub const BORDERED_BLACK_BISHOP_SPRITE: &str = "128px/b-bishop-bordered.png";
+pub const BORDERED_BLACK_BISHOP_SPRITE: &str = "128px/b_bishop_bordered.png";
 pub const WHITE_ROOK_SPRITE: &str = "128px/w_rook_png_shadow_128px.png";
+pub const BORDERED_WHITE_ROOK_SPRITE: &str = "128px/w_rook_bordered.png";
 pub const BLACK_ROOK_SPRITE: &str = "128px/b_rook_png_shadow_128px.png";
+pub const BORDERED_BLACK_ROOK_SPRITE: &str = "128px/b_rook_bordered.png";
 pub const WHITE_QUEEN_SPRITE: &str = "128px/w_queen_png_shadow_128px.png";
+pub const BORDERED_WHITE_QUEEN_SPRITE: &str = "128px/w_queen_bordered.png";
 pub const BLACK_QUEEN_SPRITE: &str = "128px/b_queen_png_shadow_128px.png";
+pub const BORDERED_BLACK_QUEEN_SPRITE: &str = "128px/b_queen_bordered.png";
 pub const WHITE_KING_SPRITE: &str = "128px/w_king_png_shadow_128px.png";
+pub const BORDERED_WHITE_KING_SPRITE: &str = "128px/w_king_bordered.png";
 pub const BLACK_KING_SPRITE: &str = "128px/b_king_png_shadow_128px.png";
+pub const BORDERED_BLACK_KING_SPRITE: &str = "128px/b_king_bordered.png";
+pub const RONALDO: &str = "ronaldo.png";
 
-// Pomysł - tablica która na pozycjach nieparzystych ma
-// figurę z ramką, a na pozycjach parzystych nie ma ramki
-// W ten sposób wystarczy sprawdzić przy kliknięciu czy i % 2 == 0
-// jesli tak to bierzemy z pozycji i+1 asset z ramką
 #[derive(Resource, Default)]
 pub struct GameTextures {
-    pub white_pawn: Handle<Image>,
-    pub black_pawn: Handle<Image>,
-    pub white_knight: Handle<Image>,
-    pub black_knight: Handle<Image>,
-    pub white_bishop: Handle<Image>,
-    pub black_bishop: Handle<Image>,
-    pub bordered_black_bishop: Handle<Image>,
-    pub white_rook: Handle<Image>,
-    pub black_rook: Handle<Image>,
-    pub white_queen: Handle<Image>,
-    pub black_queen: Handle<Image>,
-    pub white_king: Handle<Image>,
-    pub black_king: Handle<Image>,
+    pub white_images_map: HashMap<PieceType, (Handle<Image>, Handle<Image>)>,
+    pub black_images_map: HashMap<PieceType, (Handle<Image>, Handle<Image>)>,
+    pub error_image: Handle<Image>,
 }
 
 #[derive(Resource, Default)]

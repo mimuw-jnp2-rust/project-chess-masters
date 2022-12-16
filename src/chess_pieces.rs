@@ -1,3 +1,4 @@
+use crate::coordinates::*;
 use bevy::prelude::Component;
 
 /// The color of a piece.
@@ -5,6 +6,24 @@ use bevy::prelude::Component;
 pub enum PieceColor {
     White,
     Black,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum PieceType {
+    King,
+    Queen,
+    Rook,
+    Bishop,
+    Knight,
+    Pawn,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Component)]
+pub struct Piece {
+    pub piece_type: PieceType,
+    pub piece_color: PieceColor,
+    pub coordinates: Coordinates,
+    pub border: bool,
 }
 
 impl core::fmt::Display for PieceColor {
@@ -20,99 +39,64 @@ impl core::fmt::Display for PieceColor {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub enum PieceType {
-    King { x: i32, y: i32, color: PieceColor },
-    Queen { x: i32, y: i32, color: PieceColor },
-    Rook { x: i32, y: i32, color: PieceColor },
-    Bishop { x: i32, y: i32, color: PieceColor },
-    Knight { x: i32, y: i32, color: PieceColor },
-    Pawn { x: i32, y: i32, color: PieceColor },
-}
-
-impl core::fmt::Display for PieceType {
+impl core::fmt::Display for Piece {
     fn fmt(&self, f: &mut core::fmt::Formatter) -> Result<(), core::fmt::Error> {
         write!(
             f,
             "{}",
-            match self.get_color() {
-                PieceColor::Black => match self {
-                    Self::King { .. } => "♔",
-                    Self::Queen { .. } => "♕",
-                    Self::Rook { .. } => "♖",
-                    Self::Knight { .. } => "♘",
-                    Self::Bishop { .. } => "♗",
-                    Self::Pawn { .. } => "♙",
+            match self.piece_color {
+                PieceColor::Black => match self.piece_type {
+                    PieceType::King => "♔",
+                    PieceType::Queen => "♕",
+                    PieceType::Rook => "♖",
+                    PieceType::Knight => "♘",
+                    PieceType::Bishop => "♗",
+                    PieceType::Pawn => "♙",
                 },
-                PieceColor::White => match self {
-                    Self::King { .. } => "♚",
-                    Self::Queen { .. } => "♛",
-                    Self::Rook { .. } => "♜",
-                    Self::Knight { .. } => "♞",
-                    Self::Bishop { .. } => "♝",
-                    Self::Pawn { .. } => "♟︎",
+                PieceColor::White => match self.piece_type {
+                    PieceType::King => "♚",
+                    PieceType::Queen => "♛",
+                    PieceType::Rook => "♜",
+                    PieceType::Knight => "♞",
+                    PieceType::Bishop => "♝",
+                    PieceType::Pawn => "♟︎",
                 },
             }
         )
     }
 }
 
-impl PieceType {
-    pub fn get_color(&self) -> PieceColor {
-        match self {
-            Self::King { x: _, y: _, color }
-            | Self::Queen { x: _, y: _, color }
-            | Self::Rook { x: _, y: _, color }
-            | Self::Bishop { x: _, y: _, color }
-            | Self::Knight { x: _, y: _, color }
-            | Self::Pawn { x: _, y: _, color } => *color,
-        }
-    }
-
-    pub fn get_coordinates(&self) -> (i32, i32) {
-        match self {
-            Self::King { x, y, .. }
-            | Self::Queen { x, y, .. }
-            | Self::Rook { x, y, .. }
-            | Self::Bishop { x, y, .. }
-            | Self::Knight { x, y, .. }
-            | Self::Pawn { x, y, .. } => (*x, *y),
-        }
-    }
-
-    pub fn new(piece: &str, x: i32, y: i32, color: PieceColor) -> Self {
-        match piece {
-            "King" => PieceType::King { x, y, color },
-            "Queen" => PieceType::Queen { x, y, color },
-            "Rook" => PieceType::Rook { x, y, color },
-            "Bishop" => PieceType::Bishop { x, y, color },
-            "Knight" => PieceType::Knight { x, y, color },
-            "Pawn" => PieceType::Pawn { x, y, color },
-            _ => panic!("Invalid piece"),
+impl Piece {
+    pub fn new(piece_type: PieceType, piece_color: PieceColor, coordinates: Coordinates) -> Self {
+        Self {
+            piece_type,
+            piece_color,
+            coordinates,
+            border: false,
         }
     }
 
     #[allow(dead_code)]
     pub fn print_piece(&self) {
-        match &self {
-            PieceType::King { x, y, .. } => println!("King at ({}, {})", x, y),
-            PieceType::Queen { x, y, .. } => println!("Queen at ({}, {})", x, y),
-            PieceType::Rook { x, y, .. } => println!("Rook at ({}, {})", x, y),
-            PieceType::Bishop { x, y, .. } => println!("Bishop at ({}, {})", x, y),
-            PieceType::Knight { x, y, .. } => println!("Knight at ({}, {})", x, y),
-            PieceType::Pawn { x, y, .. } => println!("Pawn at ({}, {})", x, y),
+        match &self.piece_type {
+            PieceType::King => println!("King at ({})", self.coordinates),
+            PieceType::Queen => println!("Queen at ({})", self.coordinates),
+            PieceType::Rook => println!("Rook at ({})", self.coordinates),
+            PieceType::Bishop => println!("Bishop at ({})", self.coordinates),
+            PieceType::Knight => println!("Knight at ({})", self.coordinates),
+            PieceType::Pawn => println!("Pawn at ({})", self.coordinates),
         }
     }
 
     #[allow(dead_code)]
     pub fn get_type(&self) -> &'static str {
-        match self {
-            PieceType::King { .. } => "King",
-            PieceType::Queen { .. } => "Queen",
-            PieceType::Rook { .. } => "Rook",
-            PieceType::Bishop { .. } => "Bishop",
-            PieceType::Knight { .. } => "Knight",
-            PieceType::Pawn { .. } => "Pawn",
+        match self.piece_type {
+            PieceType::King => "King",
+            PieceType::Queen => "Queen",
+            PieceType::Rook => "Rook",
+            PieceType::Bishop => "Bishop",
+            PieceType::Knight => "Knight",
+            PieceType::Pawn => "Pawn",
         }
     }
 }

@@ -10,6 +10,32 @@ impl Plugin for BoardPlugin {
     }
 }
 
+pub fn get_image(piece: &Piece, game_textures: &Res<GameTextures>) -> Handle<Image> {
+    if piece.piece_color == PieceColor::White {
+        match game_textures.white_images_map.get(&piece.piece_type) {
+            Some(image_pair) => {
+                if piece.border {
+                    return image_pair.1.clone();
+                } else {
+                    return image_pair.0.clone();
+                }
+            }
+            None => return game_textures.error_image.clone(),
+        }
+    } else {
+        match game_textures.black_images_map.get(&piece.piece_type) {
+            Some(image_pair) => {
+                if piece.border {
+                    return image_pair.1.clone();
+                } else {
+                    return image_pair.0.clone();
+                }
+            }
+            None => return game_textures.error_image.clone(),
+        }
+    };
+}
+
 pub fn board_spawn_system(mut commands: Commands, game_textures: Res<GameTextures>) {
     let start_x = (-1.0) * ((FIELD_SIZE * BOARD_SIZE as f32) / 2.0 - (FIELD_SIZE / 2.0));
     let mut x = start_x;
@@ -52,15 +78,17 @@ pub fn board_spawn_system(mut commands: Commands, game_textures: Res<GameTexture
                     })
                     .insert(Field {
                         coordinates: Coordinates {
-                            x: i as i32 + 1,
-                            y: j as i32 + 1,
+                            x: j as i32 + 1,
+                            y: i as i32 + 1,
                         },
                         color: field_color,
-                        piece: Some(PieceType::new(
-                            "Pawn",
-                            i as i32 + 1,
-                            j as i32 + 1,
+                        piece: Some(Piece::new(
+                            PieceType::Pawn,
                             PieceColor::Black,
+                            Coordinates {
+                                x: i as i32 + 1,
+                                y: j as i32 + 1,
+                            },
                         )),
                     });
             } else {
@@ -173,9 +201,15 @@ fn spawn_pawn(
     on_window_coordinates: Vec2,
 ) {
     let texture = if color == PieceColor::White {
-        game_textures.white_pawn.clone()
+        match game_textures.white_images_map.get(&PieceType::Pawn) {
+            Some(image_pair) => image_pair.0.clone(),
+            None => game_textures.error_image.clone(),
+        }
     } else {
-        game_textures.black_pawn.clone()
+        match game_textures.black_images_map.get(&PieceType::Pawn) {
+            Some(image_pair) => image_pair.0.clone(),
+            None => game_textures.error_image.clone(),
+        }
     };
     commands
         .spawn(SpriteBundle {
@@ -187,9 +221,14 @@ fn spawn_pawn(
             },
             ..default()
         })
-        .insert(components::Piece {
-            piece_type: PieceType::new("Pawn", coordinates.x, coordinates.y, color),
-        });
+        .insert(Piece::new(
+            PieceType::Pawn,
+            color,
+            Coordinates {
+                x: coordinates.x,
+                y: coordinates.y,
+            },
+        ));
 }
 
 fn spawn_rook(
@@ -200,9 +239,15 @@ fn spawn_rook(
     on_window_coordinates: Vec2,
 ) {
     let texture = if color == PieceColor::White {
-        game_textures.white_rook.clone()
+        match game_textures.white_images_map.get(&PieceType::Rook) {
+            Some(image_pair) => image_pair.0.clone(),
+            None => game_textures.error_image.clone(),
+        }
     } else {
-        game_textures.black_rook.clone()
+        match game_textures.black_images_map.get(&PieceType::Rook) {
+            Some(image_pair) => image_pair.0.clone(),
+            None => game_textures.error_image.clone(),
+        }
     };
     commands
         .spawn(SpriteBundle {
@@ -214,9 +259,14 @@ fn spawn_rook(
             },
             ..default()
         })
-        .insert(components::Piece {
-            piece_type: PieceType::new("Rook", coordinates.x, coordinates.y, color),
-        });
+        .insert(Piece::new(
+            PieceType::Rook,
+            color,
+            Coordinates {
+                x: coordinates.x,
+                y: coordinates.y,
+            },
+        ));
 }
 
 fn spawn_knight(
@@ -227,9 +277,15 @@ fn spawn_knight(
     on_window_coordinates: Vec2,
 ) {
     let texture = if color == PieceColor::White {
-        game_textures.white_knight.clone()
+        match game_textures.white_images_map.get(&PieceType::Knight) {
+            Some(image_pair) => image_pair.0.clone(),
+            None => game_textures.error_image.clone(),
+        }
     } else {
-        game_textures.black_knight.clone()
+        match game_textures.black_images_map.get(&PieceType::Knight) {
+            Some(image_pair) => image_pair.0.clone(),
+            None => game_textures.error_image.clone(),
+        }
     };
     commands
         .spawn(SpriteBundle {
@@ -241,9 +297,14 @@ fn spawn_knight(
             },
             ..default()
         })
-        .insert(components::Piece {
-            piece_type: PieceType::new("Knight", coordinates.x, coordinates.y, color),
-        });
+        .insert(Piece::new(
+            PieceType::Knight,
+            color,
+            Coordinates {
+                x: coordinates.x,
+                y: coordinates.y,
+            },
+        ));
 }
 
 fn spawn_bishop(
@@ -254,9 +315,15 @@ fn spawn_bishop(
     on_window_coordinates: Vec2,
 ) {
     let texture = if color == PieceColor::White {
-        game_textures.white_bishop.clone()
+        match game_textures.white_images_map.get(&PieceType::Bishop) {
+            Some(image_pair) => image_pair.0.clone(),
+            None => game_textures.error_image.clone(),
+        }
     } else {
-        game_textures.black_bishop.clone()
+        match game_textures.black_images_map.get(&PieceType::Bishop) {
+            Some(image_pair) => image_pair.0.clone(),
+            None => game_textures.error_image.clone(),
+        }
     };
     commands
         .spawn(SpriteBundle {
@@ -268,9 +335,14 @@ fn spawn_bishop(
             },
             ..default()
         })
-        .insert(components::Piece {
-            piece_type: PieceType::new("Bishop", coordinates.x, coordinates.y, color),
-        });
+        .insert(Piece::new(
+            PieceType::Bishop,
+            color,
+            Coordinates {
+                x: coordinates.x,
+                y: coordinates.y,
+            },
+        ));
 }
 
 fn spawn_queen(
@@ -281,9 +353,15 @@ fn spawn_queen(
     on_window_coordinates: Vec2,
 ) {
     let texture = if color == PieceColor::White {
-        game_textures.white_queen.clone()
+        match game_textures.white_images_map.get(&PieceType::Queen) {
+            Some(image_pair) => image_pair.0.clone(),
+            None => game_textures.error_image.clone(),
+        }
     } else {
-        game_textures.black_queen.clone()
+        match game_textures.black_images_map.get(&PieceType::Queen) {
+            Some(image_pair) => image_pair.0.clone(),
+            None => game_textures.error_image.clone(),
+        }
     };
     commands
         .spawn(SpriteBundle {
@@ -295,9 +373,14 @@ fn spawn_queen(
             },
             ..default()
         })
-        .insert(components::Piece {
-            piece_type: PieceType::new("Queen", coordinates.x, coordinates.y, color),
-        });
+        .insert(Piece::new(
+            PieceType::Queen,
+            color,
+            Coordinates {
+                x: coordinates.x,
+                y: coordinates.y,
+            },
+        ));
 }
 
 fn spawn_king(
@@ -308,9 +391,15 @@ fn spawn_king(
     on_window_coordinates: Vec2,
 ) {
     let texture = if color == PieceColor::White {
-        game_textures.white_king.clone()
+        match game_textures.white_images_map.get(&PieceType::King) {
+            Some(image_pair) => image_pair.0.clone(),
+            None => game_textures.error_image.clone(),
+        }
     } else {
-        game_textures.black_king.clone()
+        match game_textures.black_images_map.get(&PieceType::King) {
+            Some(image_pair) => image_pair.0.clone(),
+            None => game_textures.error_image.clone(),
+        }
     };
     commands
         .spawn(SpriteBundle {
@@ -322,7 +411,12 @@ fn spawn_king(
             },
             ..default()
         })
-        .insert(components::Piece {
-            piece_type: PieceType::new("King", coordinates.x, coordinates.y, color),
-        });
+        .insert(Piece::new(
+            PieceType::King,
+            color,
+            Coordinates {
+                x: coordinates.x,
+                y: coordinates.y,
+            },
+        ));
 }

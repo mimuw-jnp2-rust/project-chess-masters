@@ -1,6 +1,6 @@
-use crate::chess_pieces::*;
+use crate::chess_pieces::PieceType;
 use crate::coordinates::*;
-use chess_masters::BOARD_SIZE;
+use crate::BOARD_SIZE;
 
 pub fn get_pawn_moves(coordinates: &Coordinates) -> Vec<Coordinates> {
     let result = vec![*coordinates + Coordinates { x: 0, y: 1 }];
@@ -88,13 +88,13 @@ pub fn get_bishop_moves(from: &Coordinates) -> Vec<Coordinates> {
     result.into_iter().filter(|c| c.in_board_bounds()).collect()
 }
 
-pub fn get_possible_moves(piece: Piece, coordinates: &Coordinates) -> Vec<Coordinates> {
+pub fn get_possible_moves(piece: PieceType, coordinates: &Coordinates) -> Vec<Coordinates> {
     match piece {
-        Piece::King { .. } => return get_king_moves(coordinates),
-        Piece::Queen { .. } => return get_queen_moves(coordinates),
-        Piece::Rook { .. } => return get_rook_moves(coordinates),
-        Piece::Bishop { .. } => return get_bishop_moves(coordinates),
-        Piece::Knight { .. } => return get_knight_moves(coordinates),
-        Piece::Pawn { .. } => return get_pawn_moves(coordinates),
+        PieceType::King { .. } => return get_king_moves(coordinates),
+        PieceType::Queen { .. } => return get_queen_moves(coordinates),
+        PieceType::Rook { .. } => return get_rook_moves(coordinates),
+        PieceType::Bishop { .. } => return get_bishop_moves(coordinates),
+        PieceType::Knight { .. } => return get_knight_moves(coordinates),
+        PieceType::Pawn { .. } => return get_pawn_moves(coordinates),
     }
 }
