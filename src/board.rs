@@ -121,6 +121,7 @@ pub fn board_spawn_system(
     let start_x = (-1.0) * ((FIELD_SIZE * BOARD_SIZE as f32) / 2.0 - (FIELD_SIZE / 2.0));
     let mut x = start_x;
     let mut y = (-1.0) * ((FIELD_SIZE * BOARD_SIZE as f32) / 2.0 - (FIELD_SIZE / 2.0));
+
     game_state.board = Board::new();
     let fields = &game_state.board.fields;
 

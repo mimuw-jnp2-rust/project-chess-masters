@@ -9,7 +9,7 @@ pub enum FieldColor {
     Black,
 }
 
-#[derive(Debug, Component)]
+#[derive(Debug, Component, Clone, PartialEq, Eq)]
 pub struct Field {
     pub coordinates: Coordinates,
     pub color: FieldColor,
