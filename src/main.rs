@@ -1,18 +1,13 @@
 use bevy::input::{mouse::*, ButtonState};
 use bevy::prelude::*;
 use bevy::winit::WinitSettings;
-use chess_masters::board::get_image;
+use chess_masters::board::*;
 use chess_masters::chess_pieces::*;
 use chess_masters::coordinates::mouse_pos_to_coordinates;
 use chess_masters::field::Field;
 use chess_masters::moves::*;
-use std::collections::HashMap;
-use std::hash::Hash;
-// use chess_masters::field::Field;
 use chess_masters::*;
-// use chess_pieces::*;
-// use coordinates::*;
-// use field::*;
+use std::collections::HashMap;
 
 fn setup(
     mut commands: Commands,
@@ -112,12 +107,16 @@ fn setup(
         error_image: asset_server.load(RONALDO),
     });
 
-    commands.insert_resource(Turn { white: true });
+    commands.insert_resource(GameState {
+        white: true,
+        board: Board::new(),
+    });
 
     /*let window = windows.get_primary_mut().unwrap();
     let (width, height) = window.physical_size();*/
 }
 
+#[allow(dead_code)]
 fn piece_movement_system(mut query: Query<(&mut Transform, &Piece), With<Sprite>>) {
     for (mut transform, piece) in query.iter_mut() {
         let (x, y) = (piece.coordinates.x, piece.coordinates.y);
@@ -147,8 +146,8 @@ pub fn input_handling(
             }
             for (mut sprite_field, field) in field_query.iter_mut() {
                 match field.color {
-                    field::FieldColor::White => (*sprite_field).color = WHITE_BUTTON,
-                    field::FieldColor::Black => (*sprite_field).color = BLACK_BUTTON,
+                    field::FieldColor::White => (*sprite_field).color = WHITE_FIELD,
+                    field::FieldColor::Black => (*sprite_field).color = BLACK_FIELD,
                 };
             }
 

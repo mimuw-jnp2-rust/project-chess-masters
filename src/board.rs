@@ -2,6 +2,76 @@ use crate::chess_pieces::*;
 use crate::field::*;
 use crate::*;
 
+pub struct Board {
+    pub fields: Vec<Vec<Field>>,
+}
+
+fn starting_piece_from_coordinates(coordinates: Coordinates) -> Option<Piece> {
+    let piece_color = if coordinates.y < 3 {
+        PieceColor::White
+    } else if coordinates.y > 6 {
+        PieceColor::Black
+    } else {
+        return None;
+    };
+
+    let piece_type = if coordinates.y == 2 || coordinates.y == 7 {
+        PieceType::Pawn
+    } else if coordinates.x == 1 || coordinates.x == 8 {
+        PieceType::Rook
+    } else if coordinates.x == 2 || coordinates.x == 7 {
+        PieceType::Knight
+    } else if coordinates.x == 3 || coordinates.x == 6 {
+        PieceType::Bishop
+    } else if coordinates.x == 4 {
+        PieceType::Queen
+    } else {
+        PieceType::King
+    };
+    Some(Piece {
+        piece_type: piece_type,
+        piece_color: piece_color,
+        coordinates: coordinates,
+        border: false,
+    })
+}
+
+impl Board {
+    pub fn new() -> Board {
+        let mut fields: Vec<Vec<Field>> = Vec::new();
+        for i in 0..BOARD_SIZE {
+            let mut row: Vec<Field> = Vec::new();
+            for j in 0..BOARD_SIZE {
+                let coordinates = Coordinates {
+                    x: j as i32 + 1,
+                    y: i as i32 + 1,
+                };
+                let color = if (i + j) % 2 == 0 {
+                    FieldColor::Black
+                } else {
+                    FieldColor::White
+                };
+                let piece = starting_piece_from_coordinates(coordinates);
+                row.push(Field::new(coordinates, color, piece));
+            }
+            fields.push(row);
+        }
+        Board { fields: fields }
+    }
+
+    pub fn print_board(&self) {
+        for i in 0..BOARD_SIZE {
+            for j in 0..BOARD_SIZE {
+                match &self.fields[i][j].piece {
+                    Some(piece) => print!("{}", piece),
+                    None => print!(" "),
+                }
+            }
+            println!();
+        }
+    }
+}
+
 pub struct BoardPlugin;
 
 impl Plugin for BoardPlugin {
@@ -48,29 +118,23 @@ pub fn spawn_piece(
         .insert(piece);
 }
 
-pub fn board_spawn_system(mut commands: Commands, game_textures: Res<GameTextures>) {
+pub fn board_spawn_system(
+    mut commands: Commands,
+    game_textures: Res<GameTextures>,
+    mut game_state: ResMut<GameState>,
+) {
     let start_x = (-1.0) * ((FIELD_SIZE * BOARD_SIZE as f32) / 2.0 - (FIELD_SIZE / 2.0));
     let mut x = start_x;
     let mut y = (-1.0) * ((FIELD_SIZE * BOARD_SIZE as f32) / 2.0 - (FIELD_SIZE / 2.0));
+    game_state.board = Board::new();
+    let fields = &game_state.board.fields;
 
     for i in 0..BOARD_SIZE {
         for j in 0..BOARD_SIZE {
-            let color = if (i + j) % 2 != 0 {
-                WHITE_BUTTON
+            let sprite_color = if fields[i][j].color == FieldColor::White {
+                WHITE_FIELD
             } else {
-                BLACK_BUTTON
-            };
-
-            let field_color = if color == WHITE_BUTTON {
-                FieldColor::White
-            } else {
-                FieldColor::Black
-            };
-
-            let piece_color = if i == 0 || i == 1 {
-                PieceColor::White
-            } else {
-                PieceColor::Black
+                BLACK_FIELD
             };
 
             if i == 1 || i == 6 {
@@ -82,7 +146,7 @@ pub fn board_spawn_system(mut commands: Commands, game_textures: Res<GameTexture
                         },
                         sprite: Sprite {
                             custom_size: Some(Vec2::new(FIELD_SIZE, FIELD_SIZE)),
-                            color: color,
+                            color: sprite_color,
                             ..default()
                         },
                         ..default()
@@ -92,7 +156,7 @@ pub fn board_spawn_system(mut commands: Commands, game_textures: Res<GameTexture
                             x: j as i32 + 1,
                             y: i as i32 + 1,
                         },
-                        color: field_color,
+                        color: fields[i][j].color,
                         piece: Some(Piece::new(
                             PieceType::Pawn,
                             PieceColor::Black,
@@ -111,7 +175,7 @@ pub fn board_spawn_system(mut commands: Commands, game_textures: Res<GameTexture
                         },
                         sprite: Sprite {
                             custom_size: Some(Vec2::new(FIELD_SIZE, FIELD_SIZE)),
-                            color: color,
+                            color: sprite_color,
                             ..default()
                         },
                         ..default()
@@ -121,10 +185,16 @@ pub fn board_spawn_system(mut commands: Commands, game_textures: Res<GameTexture
                             x: j as i32 + 1,
                             y: i as i32 + 1,
                         },
-                        color: field_color,
+                        color: fields[i][j].color,
                         piece: None,
                     });
             }
+
+            let piece_color = if i < 2 {
+                PieceColor::White
+            } else {
+                PieceColor::Black
+            };
 
             if i == 1 || i == 6 {
                 spawn_pawn(

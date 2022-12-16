@@ -1,2 +1,2 @@
-use crate::chess_pieces::*;
-use bevy::prelude::Component;
+// use crate::chess_pieces::*;
+// use bevy::prelude::Component;

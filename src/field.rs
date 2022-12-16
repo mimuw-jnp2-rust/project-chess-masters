@@ -16,4 +16,12 @@ pub struct Field {
     pub piece: Option<Piece>,
 }
 
-impl Field {}
+impl Field {
+    pub fn new(coordinates: Coordinates, color: FieldColor, maybe_piece: Option<Piece>) -> Self {
+        Self {
+            coordinates,
+            color,
+            piece: maybe_piece,
+        }
+    }
+}

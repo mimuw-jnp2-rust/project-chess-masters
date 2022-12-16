@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use board::*;
 use chess_pieces::PieceType;
 use coordinates::Coordinates;
 use std::collections::HashMap;
@@ -14,16 +15,16 @@ pub mod moves;
 pub const WINDOW_WIDTH: f32 = 800.0;
 pub const WINDOW_HEIGHT: f32 = 800.0;
 pub const FIELD_SIZE: f32 = 70.0;
-pub const BOARD_SIZE: u32 = 8;
+pub const BOARD_SIZE: usize = 8;
 
 pub const HOVERED_BUTTON: Color = Color::rgb(0.25, 0.25, 0.25);
 pub const PRESSED_BUTTON: Color = Color::rgb(0.35, 0.75, 0.35);
 
-pub const WHITE_BUTTON: Color = Color::rgb(0.9, 0.9, 0.9);
-pub const BLACK_BUTTON: Color = Color::rgb(0.1, 0.1, 0.1);
+pub const WHITE_FIELD: Color = Color::rgb(0.9, 0.9, 0.9);
+pub const BLACK_FIELD: Color = Color::rgb(0.1, 0.1, 0.1);
 pub const DARK_GRAY: Color = Color::rgb(80.0 / 255.0, 80.0 / 255.0, 80.0 / 255.0);
 pub const LIGHT_GRAY: Color = Color::rgb(150.0 / 255.0, 150.0 / 255.0, 150.0 / 255.0);
-pub const RED_BUTTON: Color = Color::rgb(0.9, 0.1, 0.1);
+pub const RED: Color = Color::rgb(0.9, 0.1, 0.1);
 pub const SADDLE_BROWN: Color = Color::rgb(59.0 / 255.0, 26.0 / 255.0, 14.0 / 255.0);
 
 pub const WHITE_PAWN_SPRITE: &str = "128px/w_pawn_png_shadow_128px.png";
@@ -59,8 +60,9 @@ pub struct GameTextures {
     pub error_image: Handle<Image>,
 }
 
-#[derive(Resource, Default)]
-pub struct Turn {
+#[derive(Resource)]
+pub struct GameState {
+    pub board: Board,
     pub white: bool,
 }
 
