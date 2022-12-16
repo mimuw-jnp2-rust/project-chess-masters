@@ -41,6 +41,7 @@ impl Board {
                     x: j as i32 + 1,
                     y: i as i32 + 1,
                 };
+                // 11 21 31 41 51 61 71 81 ... 18 28 38 48 58 68 78 88
                 let color = if (i + j) % 2 == 0 {
                     FieldColor::Black
                 } else {
@@ -64,6 +65,16 @@ impl Board {
             }
             println!();
         }
+    }
+
+    pub fn get_field(&self, coordinates: Coordinates) -> Option<&Field> {
+        if coordinates.x < 1 || coordinates.x > BOARD_SIZE as i32 {
+            return None;
+        }
+        if coordinates.y < 1 || coordinates.y > BOARD_SIZE as i32 {
+            return None;
+        }
+        Some(&self.fields[(coordinates.y - 1) as usize][(coordinates.x - 1) as usize])
     }
 }
 
