@@ -29,6 +29,25 @@ pub fn get_image(piece: &Piece, game_textures: &Res<GameTextures>) -> Handle<Ima
     }
 }
 
+pub fn spawn_piece(
+    commands: &mut Commands,
+    piece: Piece,
+    image: Handle<Image>,
+    on_window_coordinates: Vec2,
+) {
+    commands
+        .spawn(SpriteBundle {
+            texture: image,
+            transform: Transform {
+                translation: Vec3::new(on_window_coordinates.x, on_window_coordinates.y, 10.0),
+                scale: Vec3::new(0.3, 0.3, 1.0),
+                ..default()
+            },
+            ..default()
+        })
+        .insert(piece);
+}
+
 pub fn board_spawn_system(mut commands: Commands, game_textures: Res<GameTextures>) {
     let start_x = (-1.0) * ((FIELD_SIZE * BOARD_SIZE as f32) / 2.0 - (FIELD_SIZE / 2.0));
     let mut x = start_x;
@@ -201,17 +220,7 @@ fn spawn_pawn(
         },
     );
     let texture = get_image(&piece, game_textures);
-    commands
-        .spawn(SpriteBundle {
-            texture: texture,
-            transform: Transform {
-                translation: Vec3::new(on_window_coordinates.x, on_window_coordinates.y, 10.0),
-                scale: Vec3::new(0.3, 0.3, 1.0),
-                ..default()
-            },
-            ..default()
-        })
-        .insert(piece);
+    spawn_piece(commands, piece, texture, on_window_coordinates);
 }
 
 fn spawn_rook(
@@ -230,17 +239,7 @@ fn spawn_rook(
         },
     );
     let texture = get_image(&piece, game_textures);
-    commands
-        .spawn(SpriteBundle {
-            texture: texture,
-            transform: Transform {
-                translation: Vec3::new(on_window_coordinates.x, on_window_coordinates.y, 10.0),
-                scale: Vec3::new(0.3, 0.3, 1.0),
-                ..default()
-            },
-            ..default()
-        })
-        .insert(piece);
+    spawn_piece(commands, piece, texture, on_window_coordinates);
 }
 
 fn spawn_knight(
@@ -259,17 +258,7 @@ fn spawn_knight(
         },
     );
     let texture = get_image(&piece, game_textures);
-    commands
-        .spawn(SpriteBundle {
-            texture: texture,
-            transform: Transform {
-                translation: Vec3::new(on_window_coordinates.x, on_window_coordinates.y, 10.0),
-                scale: Vec3::new(0.3, 0.3, 1.0),
-                ..default()
-            },
-            ..default()
-        })
-        .insert(piece);
+    spawn_piece(commands, piece, texture, on_window_coordinates);
 }
 
 fn spawn_bishop(
@@ -288,17 +277,7 @@ fn spawn_bishop(
         },
     );
     let texture = get_image(&piece, game_textures);
-    commands
-        .spawn(SpriteBundle {
-            texture: texture,
-            transform: Transform {
-                translation: Vec3::new(on_window_coordinates.x, on_window_coordinates.y, 10.0),
-                scale: Vec3::new(0.3, 0.3, 1.0),
-                ..default()
-            },
-            ..default()
-        })
-        .insert(piece);
+    spawn_piece(commands, piece, texture, on_window_coordinates);
 }
 
 fn spawn_queen(
@@ -317,17 +296,7 @@ fn spawn_queen(
         },
     );
     let texture = get_image(&piece, game_textures);
-    commands
-        .spawn(SpriteBundle {
-            texture: texture,
-            transform: Transform {
-                translation: Vec3::new(on_window_coordinates.x, on_window_coordinates.y, 10.0),
-                scale: Vec3::new(0.3, 0.3, 1.0),
-                ..default()
-            },
-            ..default()
-        })
-        .insert(piece);
+    spawn_piece(commands, piece, texture, on_window_coordinates);
 }
 
 fn spawn_king(
@@ -346,15 +315,5 @@ fn spawn_king(
         },
     );
     let texture = get_image(&piece, game_textures);
-    commands
-        .spawn(SpriteBundle {
-            texture: texture,
-            transform: Transform {
-                translation: Vec3::new(on_window_coordinates.x, on_window_coordinates.y, 10.0),
-                scale: Vec3::new(0.3, 0.3, 1.0),
-                ..default()
-            },
-            ..default()
-        })
-        .insert(piece);
+    spawn_piece(commands, piece, texture, on_window_coordinates);
 }

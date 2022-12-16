@@ -129,6 +129,7 @@ fn piece_movement_system(mut query: Query<(&mut Transform, &Piece), With<Sprite>
     }
 }
 
+// podzielić na 2 funkcje: dla figur i dla pól osobne
 pub fn input_handling(
     windows: Res<Windows>,
     mut button_evr: EventReader<MouseButtonInput>,
@@ -162,7 +163,7 @@ pub fn input_handling(
                     let coords = piece.coordinates;
                     // Koncepcyjnie myślę, że chcielibyśmy po kliknięciu gdziekolwiek na planszy
                     // wyłączyć wszystkie podświetlenia, poza tymi co opisują ostatni ruch (jeśli był)
-                    // tzn. pola skąd i dokąd ruszyła figura powinny się świecić.
+                    // tzn. pola skąd i dokąd ruszyła figura powinny się świecić.00
                     if coords == clicked_coords {
                         if piece.border {
                             (*piece).border = false;
