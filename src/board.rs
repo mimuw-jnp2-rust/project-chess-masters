@@ -28,12 +28,7 @@ fn starting_piece_from_coordinates(coordinates: Coordinates) -> Option<Piece> {
     } else {
         PieceType::King
     };
-    Some(Piece {
-        piece_type: piece_type,
-        piece_color: piece_color,
-        coordinates: coordinates,
-        border: false,
-    })
+    Some(Piece::new(piece_type, piece_color, coordinates))
 }
 
 impl Board {
@@ -136,254 +131,37 @@ pub fn board_spawn_system(
             } else {
                 BLACK_FIELD
             };
+            let field_color = fields[i][j].color;
+            let coordinates = fields[i][j].coordinates;
+            let piece = fields[i][j].piece.clone();
 
-            if i == 1 || i == 6 {
-                commands
-                    .spawn(SpriteBundle {
-                        transform: Transform {
-                            translation: Vec3::new(x as f32, y as f32, 0.0),
-                            ..default()
-                        },
-                        sprite: Sprite {
-                            custom_size: Some(Vec2::new(FIELD_SIZE, FIELD_SIZE)),
-                            color: sprite_color,
-                            ..default()
-                        },
+            commands
+                .spawn(SpriteBundle {
+                    transform: Transform {
+                        translation: Vec3::new(x as f32, y as f32, 0.0),
                         ..default()
-                    })
-                    .insert(Field {
-                        coordinates: Coordinates {
-                            x: j as i32 + 1,
-                            y: i as i32 + 1,
-                        },
-                        color: fields[i][j].color,
-                        piece: Some(Piece::new(
-                            PieceType::Pawn,
-                            PieceColor::Black,
-                            Coordinates {
-                                x: i as i32 + 1,
-                                y: j as i32 + 1,
-                            },
-                        )),
-                    });
-            } else {
-                commands
-                    .spawn(SpriteBundle {
-                        transform: Transform {
-                            translation: Vec3::new(x as f32, y as f32, 0.0),
-                            ..default()
-                        },
-                        sprite: Sprite {
-                            custom_size: Some(Vec2::new(FIELD_SIZE, FIELD_SIZE)),
-                            color: sprite_color,
-                            ..default()
-                        },
-                        ..default()
-                    })
-                    .insert(Field {
-                        coordinates: Coordinates {
-                            x: j as i32 + 1,
-                            y: i as i32 + 1,
-                        },
-                        color: fields[i][j].color,
-                        piece: None,
-                    });
-            }
-
-            let piece_color = if i < 2 {
-                PieceColor::White
-            } else {
-                PieceColor::Black
-            };
-
-            if i == 1 || i == 6 {
-                spawn_pawn(
-                    &mut commands,
-                    &game_textures,
-                    Coordinates {
-                        x: j as i32 + 1,
-                        y: i as i32 + 1,
                     },
-                    piece_color,
-                    Vec2 { x: (x), y: (y) },
-                )
+                    sprite: Sprite {
+                        custom_size: Some(Vec2::new(FIELD_SIZE, FIELD_SIZE)),
+                        color: sprite_color,
+                        ..default()
+                    },
+                    ..default()
+                })
+                .insert(Field {
+                    coordinates: coordinates,
+                    color: field_color,
+                    piece: piece.clone(),
+                });
+
+            if let Some(piece) = piece {
+                let image = get_image(&piece, &game_textures);
+                spawn_piece(&mut commands, piece, image, Vec2 { x: (x), y: (y) })
             }
 
-            if i == 0 || i == 7 {
-                if j == 0 || j == 7 {
-                    spawn_rook(
-                        &mut commands,
-                        &game_textures,
-                        Coordinates {
-                            x: j as i32 + 1,
-                            y: i as i32 + 1,
-                        },
-                        piece_color,
-                        Vec2 { x: (x), y: (y) },
-                    )
-                } else if j == 1 || j == 6 {
-                    spawn_knight(
-                        &mut commands,
-                        &game_textures,
-                        Coordinates {
-                            x: j as i32 + 1,
-                            y: i as i32 + 1,
-                        },
-                        piece_color,
-                        Vec2 { x: (x), y: (y) },
-                    )
-                } else if j == 2 || j == 5 {
-                    spawn_bishop(
-                        &mut commands,
-                        &game_textures,
-                        Coordinates {
-                            x: j as i32 + 1,
-                            y: i as i32 + 1,
-                        },
-                        piece_color,
-                        Vec2 { x: (x), y: (y) },
-                    )
-                } else if j == 3 {
-                    spawn_queen(
-                        &mut commands,
-                        &game_textures,
-                        Coordinates {
-                            x: j as i32 + 1,
-                            y: i as i32 + 1,
-                        },
-                        piece_color,
-                        Vec2 { x: (x), y: (y) },
-                    )
-                } else if j == 4 {
-                    spawn_king(
-                        &mut commands,
-                        &game_textures,
-                        Coordinates {
-                            x: j as i32 + 1,
-                            y: i as i32 + 1,
-                        },
-                        piece_color,
-                        Vec2 { x: (x), y: (y) },
-                    )
-                }
-            }
             x += FIELD_SIZE;
         }
         x = start_x;
         y += FIELD_SIZE;
     }
-}
-
-fn spawn_pawn(
-    commands: &mut Commands,
-    game_textures: &Res<GameTextures>,
-    coordinates: Coordinates,
-    color: PieceColor,
-    on_window_coordinates: Vec2,
-) {
-    let piece = Piece::new(
-        PieceType::Pawn,
-        color,
-        Coordinates {
-            x: coordinates.x,
-            y: coordinates.y,
-        },
-    );
-    let texture = get_image(&piece, game_textures);
-    spawn_piece(commands, piece, texture, on_window_coordinates);
-}
-
-fn spawn_rook(
-    commands: &mut Commands,
-    game_textures: &Res<GameTextures>,
-    coordinates: Coordinates,
-    color: PieceColor,
-    on_window_coordinates: Vec2,
-) {
-    let piece = Piece::new(
-        PieceType::Rook,
-        color,
-        Coordinates {
-            x: coordinates.x,
-            y: coordinates.y,
-        },
-    );
-    let texture = get_image(&piece, game_textures);
-    spawn_piece(commands, piece, texture, on_window_coordinates);
-}
-
-fn spawn_knight(
-    commands: &mut Commands,
-    game_textures: &Res<GameTextures>,
-    coordinates: Coordinates,
-    color: PieceColor,
-    on_window_coordinates: Vec2,
-) {
-    let piece = Piece::new(
-        PieceType::Knight,
-        color,
-        Coordinates {
-            x: coordinates.x,
-            y: coordinates.y,
-        },
-    );
-    let texture = get_image(&piece, game_textures);
-    spawn_piece(commands, piece, texture, on_window_coordinates);
-}
-
-fn spawn_bishop(
-    commands: &mut Commands,
-    game_textures: &Res<GameTextures>,
-    coordinates: Coordinates,
-    color: PieceColor,
-    on_window_coordinates: Vec2,
-) {
-    let piece = Piece::new(
-        PieceType::Bishop,
-        color,
-        Coordinates {
-            x: coordinates.x,
-            y: coordinates.y,
-        },
-    );
-    let texture = get_image(&piece, game_textures);
-    spawn_piece(commands, piece, texture, on_window_coordinates);
-}
-
-fn spawn_queen(
-    commands: &mut Commands,
-    game_textures: &Res<GameTextures>,
-    coordinates: Coordinates,
-    color: PieceColor,
-    on_window_coordinates: Vec2,
-) {
-    let piece = Piece::new(
-        PieceType::Queen,
-        color,
-        Coordinates {
-            x: coordinates.x,
-            y: coordinates.y,
-        },
-    );
-    let texture = get_image(&piece, game_textures);
-    spawn_piece(commands, piece, texture, on_window_coordinates);
-}
-
-fn spawn_king(
-    commands: &mut Commands,
-    game_textures: &Res<GameTextures>,
-    coordinates: Coordinates,
-    color: PieceColor,
-    on_window_coordinates: Vec2,
-) {
-    let piece = Piece::new(
-        PieceType::King,
-        color,
-        Coordinates {
-            x: coordinates.x,
-            y: coordinates.y,
-        },
-    );
-    let texture = get_image(&piece, game_textures);
-    spawn_piece(commands, piece, texture, on_window_coordinates);
 }

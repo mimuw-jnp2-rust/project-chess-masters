@@ -107,6 +107,9 @@ fn setup(
         error_image: asset_server.load(RONALDO),
     });
 
+    let board = Board::new();
+    board.print_board();
+
     commands.insert_resource(GameState {
         white: true,
         board: Board::new(),
