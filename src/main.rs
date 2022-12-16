@@ -110,19 +110,6 @@ fn setup(
             ),
         ]),
         error_image: asset_server.load(RONALDO),
-        /*white_pawn: asset_server.load(WHITE_PAWN_SPRITE),
-        black_pawn: asset_server.load(BLACK_PAWN_SPRITE),
-        white_knight: asset_server.load(WHITE_KNIGHT_SPRITE),
-        black_knight: asset_server.load(BLACK_KNIGHT_SPRITE),
-        white_bishop: asset_server.load(WHITE_BISHOP_SPRITE),
-        black_bishop: asset_server.load(BLACK_BISHOP_SPRITE),
-        bordered_black_bishop: asset_server.load(BORDERED_BLACK_BISHOP_SPRITE),
-        white_rook: asset_server.load(WHITE_ROOK_SPRITE),
-        black_rook: asset_server.load(BLACK_ROOK_SPRITE),
-        white_queen: asset_server.load(WHITE_QUEEN_SPRITE),
-        black_queen: asset_server.load(BLACK_QUEEN_SPRITE),
-        white_king: asset_server.load(WHITE_KING_SPRITE),
-        black_king: asset_server.load(BLACK_KING_SPRITE),*/
     });
 
     commands.insert_resource(Turn { white: true });
@@ -177,11 +164,6 @@ pub fn input_handling(
                     // wyłączyć wszystkie podświetlenia, poza tymi co opisują ostatni ruch (jeśli był)
                     // tzn. pola skąd i dokąd ruszyła figura powinny się świecić.
                     if coords == clicked_coords {
-                        /*if *image == game_textures.bordered_black_bishop {
-                            *image = game_textures.black_bishop.clone();
-                        } else {
-                            *image = game_textures.bordered_black_bishop.clone();
-                        }*/
                         if piece.border {
                             (*piece).border = false;
                             *image = get_image(&piece, &game_textures);
