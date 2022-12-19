@@ -76,6 +76,16 @@ impl Board {
         }
         Some(&self.fields[(coordinates.y - 1) as usize][(coordinates.x - 1) as usize])
     }
+
+    pub fn get_field_mut(&mut self, coordinates: Coordinates) -> Option<&mut Field> {
+        if coordinates.x < 1 || coordinates.x > BOARD_SIZE as i32 {
+            return None;
+        }
+        if coordinates.y < 1 || coordinates.y > BOARD_SIZE as i32 {
+            return None;
+        }
+        Some(&mut self.fields[(coordinates.y - 1) as usize][(coordinates.x - 1) as usize])
+    }
 }
 
 pub struct BoardPlugin;

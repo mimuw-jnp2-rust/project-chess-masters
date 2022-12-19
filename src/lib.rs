@@ -64,7 +64,12 @@ pub struct GameTextures {
 pub struct GameState {
     pub board: Board,
     pub white: bool,
+    //pub selected_piece: Option<Coordinates>,
 }
+
+// Plan jest taki ze jak jest stan default to nie ma zaznaczonego pionka
+// jak jest stan selected to jest zaznaczony pionek
+// funkcje
 
 /*pub fn change_color_touching_buttons(
     //mut commands: Commands,
