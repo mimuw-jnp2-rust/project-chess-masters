@@ -137,6 +137,9 @@ pub fn border_piece_on_click(
     game_textures: Res<GameTextures>,
 ) {
     let window = windows.get_primary().unwrap();
+    // get current window size
+    let height = window.physical_height();
+    let width = window.physical_width();
 
     for event in button_evr.iter() {
         if let ButtonState::Pressed = event.state {
@@ -146,7 +149,7 @@ pub fn border_piece_on_click(
 
             let position = window.cursor_position();
             if let Some(pos) = position {
-                let clicked_coords = mouse_pos_to_coordinates(pos.x, pos.y);
+                let clicked_coords = mouse_pos_to_coordinates(pos.x, pos.y, width, height);
                 for (mut image, mut piece) in piece_query.iter_mut() {
                     if piece.coordinates == clicked_coords {
                         if piece.border {
@@ -174,6 +177,9 @@ pub fn highlight_moves_on_click(
     game_state: Res<GameState>,
 ) {
     let window = windows.get_primary().unwrap();
+    // get current window size
+    let height = window.physical_height();
+    let width = window.physical_width();
 
     for event in button_evr.iter() {
         if let ButtonState::Pressed = event.state {
@@ -190,7 +196,7 @@ pub fn highlight_moves_on_click(
             }
 
             if let Some(pos) = window.cursor_position() {
-                let clicked_coords = mouse_pos_to_coordinates(pos.x, pos.y);
+                let clicked_coords = mouse_pos_to_coordinates(pos.x, pos.y, width, height);
                 println!("clicked_coords = {}", clicked_coords);
 
                 if let Some(clicked_field) = &game_state.board.get_field(clicked_coords) {
@@ -205,6 +211,50 @@ pub fn highlight_moves_on_click(
                                 }
                             }
                         }
+                    }
+                }
+            }
+        }
+    }
+}
+
+fn move_piece_on_click(
+    windows: Res<Windows>,
+    mut button_evr: EventReader<MouseButtonInput>,
+    //mut field_query: Query<(&mut Sprite, &Field), With<Sprite>>,
+    mut piece_query: Query<(&mut Transform, &mut Piece), With<Sprite>>,
+    // game_state: Res<GameState>,
+    // koordynaty podswietlonej figury
+) {
+    let window = windows.get_primary().unwrap();
+    // get current window size
+    let height = window.physical_height();
+    let width = window.physical_width();
+
+    for event in button_evr.iter() {
+        if let ButtonState::Pressed = event.state {
+            if event.button != MouseButton::Left {
+                continue;
+            }
+
+            let position = window.cursor_position();
+            if let Some(mut pos) = position {
+                pos.x -= width as f32 / 2.0;
+                pos.y -= height as f32 / 2.0;
+                let clicked_coords = mouse_pos_to_coordinates(pos.x, pos.y, width, height);
+                // if kliknięte podświetlone pole to rusz na nie figurę
+                for (mut transform, piece) in piece_query.iter_mut() {
+                    if piece.border {
+                        /*let possible_moves =
+                        get_possible_moves(piece.piece_type, &piece.coordinates);*/
+                        let translation = &mut transform.translation;
+                        translation.x = pos.x;
+                        translation.y = pos.y;
+                        /*if possible_moves.contains(&clicked_coords) {
+                            // print!("possible coords = {}", &clicked_coords);
+                        } else {
+                            println!("Nie można ruszyć figury na to pole");
+                        }*/
                     }
                 }
             }
@@ -230,5 +280,6 @@ fn main() {
         //.add_system(piece_movement_system)
         .add_system(highlight_moves_on_click)
         .add_system(border_piece_on_click)
+        .add_system(move_piece_on_click)
         .run();
 }
