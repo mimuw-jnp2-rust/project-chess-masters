@@ -2,7 +2,7 @@ use crate::board::*;
 use crate::chess_pieces::*;
 use crate::coordinates::*;
 
-pub fn ok_king_knight_move(coords: &Coordinates, board: &Board, color: PieceColor) -> bool {
+fn ok_king_knight_move(coords: &Coordinates, board: &Board, color: PieceColor) -> bool {
     if let Some(field) = board.get_field(*coords) {
         if let Some(some_piece) = &field.piece {
             if some_piece.piece_color == color {
@@ -18,7 +18,7 @@ pub fn ok_king_knight_move(coords: &Coordinates, board: &Board, color: PieceColo
     }
 }
 
-pub fn get_pawn_moves(piece: &Piece, board: &Board) -> Vec<Coordinates> {
+fn get_pawn_moves(piece: &Piece, board: &Board) -> Vec<Coordinates> {
     let directions;
     let dest;
     let mut result: Vec<Coordinates> = Vec::new();
@@ -59,7 +59,7 @@ pub fn get_pawn_moves(piece: &Piece, board: &Board) -> Vec<Coordinates> {
     result
 }
 
-pub fn get_knight_moves(piece: &Piece, board: &Board) -> Vec<Coordinates> {
+fn get_knight_moves(piece: &Piece, board: &Board) -> Vec<Coordinates> {
     let mut result = Vec::new();
     let mul = vec![(-1, 1), (1, -1), (1, 1), (-1, -1)];
 
@@ -80,7 +80,7 @@ pub fn get_knight_moves(piece: &Piece, board: &Board) -> Vec<Coordinates> {
         .collect()
 }
 
-pub fn get_king_moves(piece: &Piece, board: &Board) -> Vec<Coordinates> {
+fn get_king_moves(piece: &Piece, board: &Board) -> Vec<Coordinates> {
     let mut result = Vec::new();
     let directions = vec![
         (-1, 1),
@@ -106,13 +106,13 @@ pub fn get_king_moves(piece: &Piece, board: &Board) -> Vec<Coordinates> {
         .collect()
 }
 
-pub fn get_queen_moves(piece: &Piece, board: &Board) -> Vec<Coordinates> {
+fn get_queen_moves(piece: &Piece, board: &Board) -> Vec<Coordinates> {
     let mut result = get_rook_moves(piece, board);
     result.append(&mut get_bishop_moves(piece, board));
     result
 }
 
-pub fn get_rook_bishop_moves(
+fn get_rook_bishop_moves(
     piece: &Piece,
     board: &Board,
     directions: Vec<(i32, i32)>,
@@ -143,12 +143,12 @@ pub fn get_rook_bishop_moves(
     result
 }
 
-pub fn get_rook_moves(piece: &Piece, board: &Board) -> Vec<Coordinates> {
+fn get_rook_moves(piece: &Piece, board: &Board) -> Vec<Coordinates> {
     let directions = vec![(0, 1), (1, 0), (0, -1), (-1, 0)];
     get_rook_bishop_moves(piece, board, directions)
 }
 
-pub fn get_bishop_moves(piece: &Piece, board: &Board) -> Vec<Coordinates> {
+fn get_bishop_moves(piece: &Piece, board: &Board) -> Vec<Coordinates> {
     let directions = vec![(1, 1), (-1, 1), (1, -1), (-1, -1)];
     get_rook_bishop_moves(piece, board, directions)
 }

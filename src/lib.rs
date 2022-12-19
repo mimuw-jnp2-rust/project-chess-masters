@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use board::*;
-use chess_pieces::PieceType;
+use chess_pieces::{Piece, PieceType};
 use coordinates::Coordinates;
 use std::collections::HashMap;
 
@@ -64,7 +64,7 @@ pub struct GameTextures {
 pub struct GameState {
     pub board: Board,
     pub white: bool,
-    //pub selected_piece: Option<Coordinates>,
+    pub selected_piece: Option<Piece>,
 }
 
 // Plan jest taki ze jak jest stan default to nie ma zaznaczonego pionka

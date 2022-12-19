@@ -86,6 +86,44 @@ impl Board {
         }
         Some(&mut self.fields[(coordinates.y - 1) as usize][(coordinates.x - 1) as usize])
     }
+
+    pub fn get_piece(&self, coordinates: Coordinates) -> Option<&Piece> {
+        match self.get_field(coordinates) {
+            Some(field) => match &field.piece {
+                Some(piece) => Some(piece),
+                None => None,
+            },
+            None => None,
+        }
+    }
+
+    pub fn remove_piece(&mut self, coordinates: Coordinates) -> Option<Piece> {
+        match self.get_field_mut(coordinates) {
+            Some(field) => {
+                let piece = field.piece.clone();
+                field.piece = None;
+                piece
+            }
+            None => None,
+        }
+    }
+
+    pub fn move_piece(&mut self, from: Coordinates, to: Coordinates) -> bool {
+        let piece = self.remove_piece(from);
+        match piece {
+            Some(piece) => {
+                let field = self.get_field_mut(to);
+                match field {
+                    Some(field) => {
+                        field.piece = Some(piece);
+                        true
+                    }
+                    None => false,
+                }
+            }
+            None => false,
+        }
+    }
 }
 
 pub struct BoardPlugin;
