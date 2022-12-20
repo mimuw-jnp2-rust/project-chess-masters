@@ -140,8 +140,8 @@ pub fn border_piece_on_click(
 ) {
     let window = windows.get_primary().unwrap();
     // get current window size
-    let height = window.physical_height();
-    let width = window.physical_width();
+    let height = window.height();
+    let width = window.width();
 
     for event in button_evr.iter() {
         if let ButtonState::Pressed = event.state {
@@ -222,8 +222,9 @@ pub fn highlight_moves_on_click(
 ) {
     let window = windows.get_primary().unwrap();
     // get current window size
-    let height = window.physical_height();
-    let width = window.physical_width();
+    let height = window.height();
+    //print!("height i guess is {}", height);
+    let width = window.width();
 
     for event in button_evr.iter() {
         if let ButtonState::Pressed = event.state {
@@ -272,8 +273,8 @@ fn move_piece_on_click(
 ) {
     let window = windows.get_primary().unwrap();
     // get current window size
-    let height = window.physical_height();
-    let width = window.physical_width();
+    let height = window.height();
+    let width = window.width();
 
     for event in button_evr.iter() {
         if let ButtonState::Pressed = event.state {
