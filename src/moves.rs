@@ -130,8 +130,8 @@ fn get_rook_bishop_moves(
                     if some_piece.piece_color != piece.piece_color {
                         result.push(coords.clone());
                     }
+                    break;
                 }
-                break;
             }
             result.push(coords.clone());
             coords = Coordinates {

@@ -1,5 +1,5 @@
 use crate::coordinates::*;
-use bevy::prelude::Component;
+use bevy::prelude::{Component, Entity};
 
 /// The color of a piece.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -20,6 +20,7 @@ pub enum PieceType {
 
 #[derive(Debug, Clone, PartialEq, Eq, Component)]
 pub struct Piece {
+    pub entity: Option<Entity>,
     pub piece_type: PieceType,
     pub piece_color: PieceColor,
     pub coordinates: Coordinates,
@@ -69,6 +70,7 @@ impl core::fmt::Display for Piece {
 impl Piece {
     pub fn new(piece_type: PieceType, piece_color: PieceColor, coordinates: Coordinates) -> Self {
         Self {
+            entity: None,
             piece_type,
             piece_color,
             coordinates,
@@ -98,5 +100,13 @@ impl Piece {
             PieceType::Knight => "Knight",
             PieceType::Pawn => "Pawn",
         }
+    }
+
+    pub fn get_entity(&self) -> Option<Entity> {
+        self.entity
+    }
+
+    pub fn set_entity(&mut self, entity: Entity) {
+        self.entity = Some(entity);
     }
 }

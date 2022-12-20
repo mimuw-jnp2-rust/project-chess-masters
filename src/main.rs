@@ -134,7 +134,8 @@ pub fn clear_board() {}
 pub fn border_piece_on_click(
     windows: Res<Windows>,
     mut button_evr: EventReader<MouseButtonInput>,
-    mut piece_query: Query<(&mut Handle<Image>, &mut Transform, &mut Piece), With<Sprite>>,
+    mut piece_query: Query<(Entity, &mut Handle<Image>, &mut Transform, &mut Piece), With<Sprite>>,
+    mut field_query: Query<&mut Field, With<Sprite>>,
     game_textures: Res<GameTextures>,
     mut game_state: ResMut<GameState>,
 ) {
@@ -152,56 +153,71 @@ pub fn border_piece_on_click(
             let position = window.cursor_position();
             if let Some(pos) = position {
                 let clicked_coords = mouse_pos_to_coordinates(pos.x, pos.y, width, height);
-                // Teraz trzeba sprawdzić czy jest jakaś figura, która ma border = true
                 if game_state.selected_piece.is_some() {
                     println!("it is some!");
-                    let selected_piece = game_state.selected_piece.clone().unwrap();
+                    let selected_piece_id = game_state.selected_piece.unwrap();
+                    let query_item = piece_query.get_mut(selected_piece_id);
+                    let (_, mut image, mut transform, mut selected_piece) = query_item.unwrap();
+
                     if selected_piece.coordinates == clicked_coords {
                         game_state.selected_piece = None;
-                        for (mut image, _, mut piece) in piece_query.iter_mut() {
-                            (*piece).border = false;
-                            *image = get_image(&piece, &game_textures);
-                        }
-                        return;
+                        (*selected_piece).border = false;
+                        *image = get_image(&selected_piece, &game_textures);
                     } else {
                         let possible_moves = get_possible_moves(&selected_piece, &game_state.board);
                         game_state.selected_piece = None;
                         if possible_moves.contains(&clicked_coords) {
-                            println!("it is possible!");
+                            println!(
+                                "it is possible to make move from {:?} to {:?}",
+                                selected_piece.coordinates, clicked_coords
+                            );
                             let _ = &game_state
                                 .board
                                 .move_piece(selected_piece.coordinates, clicked_coords);
 
-                            game_state.white = !game_state.white;
+                            //game_state.board.print_board();
 
-                            for (mut image, mut transform, mut piece) in piece_query.iter_mut() {
-                                if *piece == selected_piece {
-                                    let translation = &mut transform.translation;
-                                    translation.x += (clicked_coords.x as f32
-                                        - piece.coordinates.x as f32)
-                                        * FIELD_SIZE;
-                                    translation.y += (clicked_coords.y as f32
-                                        - piece.coordinates.y as f32)
-                                        * FIELD_SIZE;
-                                    piece.coordinates = clicked_coords;
-                                    *image = get_image(&piece, &game_textures);
-                                }
-                            }
+                            let old_field_id = game_state
+                                .board
+                                .get_field_entity(selected_piece.coordinates);
+
+                            let new_field_id = game_state.board.get_field_entity(clicked_coords);
+                            let old_field_query_item = field_query.get_mut(old_field_id.unwrap());
+                            let mut old_field = old_field_query_item.unwrap();
+                            old_field.piece = None;
+                            let new_field_query_item = field_query.get_mut(new_field_id.unwrap());
+
+                            let mut new_field = new_field_query_item.unwrap();
+                            new_field.piece = Some(selected_piece.clone());
+
+                            game_state.white = !game_state.white;
+                            let translation = &mut transform.translation;
+                            translation.x += (clicked_coords.x as f32
+                                - selected_piece.coordinates.x as f32)
+                                * FIELD_SIZE;
+                            translation.y += (clicked_coords.y as f32
+                                - selected_piece.coordinates.y as f32)
+                                * FIELD_SIZE;
+
+                            selected_piece.coordinates = clicked_coords;
                         } else {
-                            println!("it is not possible!");
+                            println!(
+                                "it is not possible to make move from {:?} to {:?}",
+                                selected_piece.coordinates, clicked_coords
+                            );
                         }
                         game_state.selected_piece = None;
-                        for (mut image, _, mut piece) in piece_query.iter_mut() {
+                        for (_, mut image, _, mut piece) in piece_query.iter_mut() {
                             (*piece).border = false;
                             *image = get_image(&piece, &game_textures);
                         }
                     }
                 } else {
-                    for (mut image, _, mut piece) in piece_query.iter_mut() {
+                    for (entity, mut image, _, mut piece) in piece_query.iter_mut() {
                         if piece.coordinates == clicked_coords {
                             (*piece).border = true;
                             *image = get_image(&piece, &game_textures);
-                            game_state.selected_piece = Some(piece.clone());
+                            game_state.selected_piece = Some(entity);
                         } else {
                             (*piece).border = false;
                             *image = get_image(&piece, &game_textures);
@@ -244,8 +260,12 @@ pub fn highlight_moves_on_click(
                 println!("clicked_coords = {}", clicked_coords);
 
                 if let Some(clicked_field) = &game_state.board.get_field(clicked_coords) {
+                    println!("clicked_field = {:?}", clicked_field);
                     if let Some(piece) = &clicked_field.piece {
+                        println!("piece = {:?}", piece);
+                        game_state.board.print_board();
                         let possible_moves = get_possible_moves(&piece, &game_state.board);
+                        println!("possible_moves = {:?}", possible_moves);
                         for (mut sprite_field, field) in field_query.iter_mut() {
                             if possible_moves.contains(&field.coordinates) {
                                 //println!("possible coords = {}", &field.coordinates);
@@ -262,6 +282,7 @@ pub fn highlight_moves_on_click(
     }
 }
 
+#[allow(dead_code)]
 fn move_piece_on_click(
     windows: Res<Windows>,
     mut button_evr: EventReader<MouseButtonInput>,
@@ -285,7 +306,7 @@ fn move_piece_on_click(
             if let Some(mut pos) = position {
                 pos.x -= width as f32 / 2.0;
                 pos.y -= height as f32 / 2.0;
-                let clicked_coords = mouse_pos_to_coordinates(pos.x, pos.y, width, height);
+                //let clicked_coords = mouse_pos_to_coordinates(pos.x, pos.y, width, height);
                 // if kliknięte podświetlone pole to rusz na nie figurę
                 for (mut transform, piece) in piece_query.iter_mut() {
                     if piece.border {

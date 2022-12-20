@@ -115,6 +115,8 @@ impl Board {
                 let field = self.get_field_mut(to);
                 match field {
                     Some(field) => {
+                        let mut piece = piece;
+                        piece.coordinates = to;
                         field.piece = Some(piece);
                         true
                     }
@@ -122,6 +124,40 @@ impl Board {
                 }
             }
             None => false,
+        }
+    }
+
+    pub fn set_field_entity(&mut self, coordinates: Coordinates, entity: Entity) {
+        match self.get_field_mut(coordinates) {
+            Some(field) => field.entity = Some(entity),
+            None => {}
+        }
+    }
+
+    pub fn get_field_entity(&self, coordinates: Coordinates) -> Option<Entity> {
+        match self.get_field(coordinates) {
+            Some(field) => field.entity,
+            None => None,
+        }
+    }
+
+    pub fn get_piece_entity(&self, coordinates: Coordinates) -> Option<Entity> {
+        match self.get_field(coordinates) {
+            Some(field) => match &field.piece {
+                Some(piece) => piece.entity,
+                None => None,
+            },
+            None => None,
+        }
+    }
+
+    pub fn set_piece_entity(&mut self, coordinates: Coordinates, entity: Entity) {
+        match self.get_field_mut(coordinates) {
+            Some(field) => match &mut field.piece {
+                Some(piece) => piece.entity = Some(entity),
+                None => {}
+            },
+            None => {}
         }
     }
 }
@@ -155,11 +191,11 @@ pub fn get_image(piece: &Piece, game_textures: &Res<GameTextures>) -> Handle<Ima
 
 pub fn spawn_piece(
     commands: &mut Commands,
-    piece: Piece,
+    mut piece: Piece,
     image: Handle<Image>,
     on_window_coordinates: Vec2,
-) {
-    commands
+) -> Entity {
+    let id = commands
         .spawn(SpriteBundle {
             texture: image,
             transform: Transform {
@@ -169,7 +205,10 @@ pub fn spawn_piece(
             },
             ..default()
         })
-        .insert(piece);
+        .id();
+    piece.entity = Some(id);
+    commands.entity(id).insert(piece);
+    id
 }
 
 pub fn board_spawn_system(
@@ -182,20 +221,19 @@ pub fn board_spawn_system(
     let mut y = (-1.0) * ((FIELD_SIZE * BOARD_SIZE as f32) / 2.0 - (FIELD_SIZE / 2.0));
 
     game_state.board = Board::new();
-    let fields = &game_state.board.fields;
 
     for i in 0..BOARD_SIZE {
         for j in 0..BOARD_SIZE {
-            let sprite_color = if fields[i][j].color == FieldColor::White {
+            let sprite_color = if game_state.board.fields[i][j].color == FieldColor::White {
                 WHITE_FIELD
             } else {
                 BLACK_FIELD
             };
-            let field_color = fields[i][j].color;
-            let coordinates = fields[i][j].coordinates;
-            let piece = fields[i][j].piece.clone();
+            let field_color = game_state.board.fields[i][j].color;
+            let coordinates = game_state.board.fields[i][j].coordinates;
+            let piece = game_state.board.fields[i][j].piece.clone();
 
-            commands
+            let field_id = commands
                 .spawn(SpriteBundle {
                     transform: Transform {
                         translation: Vec3::new(x as f32, y as f32, 0.0),
@@ -208,15 +246,21 @@ pub fn board_spawn_system(
                     },
                     ..default()
                 })
-                .insert(Field {
-                    coordinates: coordinates,
-                    color: field_color,
-                    piece: piece.clone(),
-                });
+                .id();
+
+            commands.entity(field_id).insert(Field {
+                entity: Some(field_id),
+                coordinates: coordinates,
+                color: field_color,
+                piece: piece.clone(),
+            });
+
+            game_state.board.set_field_entity(coordinates, field_id);
 
             if let Some(piece) = piece {
                 let image = get_image(&piece, &game_textures);
-                spawn_piece(&mut commands, piece, image, Vec2 { x: (x), y: (y) })
+                let piece_id = spawn_piece(&mut commands, piece, image, Vec2 { x: (x), y: (y) });
+                game_state.board.set_piece_entity(coordinates, piece_id);
             }
 
             x += FIELD_SIZE;
