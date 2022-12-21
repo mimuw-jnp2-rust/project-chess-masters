@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use board::*;
-use chess_pieces::PieceType;
+use chess_pieces::*;
 use coordinates::Coordinates;
 use std::collections::HashMap;
 
@@ -65,6 +65,25 @@ pub struct GameState {
     pub board: Board,
     pub white: bool,
     pub selected_piece: Option<Entity>,
+}
+
+pub fn get_image(piece: &Piece, game_textures: &Res<GameTextures>) -> Handle<Image> {
+    let maybe_image;
+    if piece.piece_color == PieceColor::White {
+        maybe_image = game_textures.white_images_map.get(&piece.piece_type);
+    } else {
+        maybe_image = game_textures.black_images_map.get(&piece.piece_type);
+    };
+    match maybe_image {
+        Some(image_pair) => {
+            if piece.border {
+                return image_pair.1.clone();
+            } else {
+                return image_pair.0.clone();
+            }
+        }
+        None => return game_textures.error_image.clone(),
+    }
 }
 
 // Plan jest taki ze jak jest stan default to nie ma zaznaczonego pionka
