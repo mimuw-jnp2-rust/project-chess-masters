@@ -11,6 +11,7 @@ pub mod components;
 pub mod coordinates;
 pub mod field;
 pub mod moves;
+pub mod user_input;
 
 pub const WINDOW_WIDTH: f32 = 800.0;
 pub const WINDOW_HEIGHT: f32 = 800.0;
@@ -64,7 +65,7 @@ pub struct GameTextures {
 pub struct GameState {
     pub board: Board,
     pub white: bool,
-    pub selected_piece: Option<Entity>,
+    pub selected_entity: Option<Entity>,
 }
 
 pub fn get_image(piece: &Piece, game_textures: &Res<GameTextures>) -> Handle<Image> {
@@ -85,72 +86,3 @@ pub fn get_image(piece: &Piece, game_textures: &Res<GameTextures>) -> Handle<Ima
         None => return game_textures.error_image.clone(),
     }
 }
-
-// Plan jest taki ze jak jest stan default to nie ma zaznaczonego pionka
-// jak jest stan selected to jest zaznaczony pionek
-// funkcje
-
-/*pub fn change_color_touching_buttons(
-    //mut commands: Commands,
-    mut interaction_query: Query<
-        (&Interaction, &Coordinates),
-        (Changed<Interaction>, With<Button>),
-    >,
-    mut color_query: Query<(&mut BackgroundColor, &Coordinates), With<Button>>,
-) {
-    for (interaction, coordinates) in &mut interaction_query {
-        if *interaction == Interaction::Clicked {
-            let curr_coordinates = coordinates.clone();
-
-            // first reset all colors to white or black
-            for (mut color, coordinates) in &mut color_query {
-                if (coordinates.x + coordinates.y) % 2 == 0 {
-                    *color = WHITE_BUTTON.into();
-                } else {
-                    *color = BLACK_BUTTON.into();
-                }
-            }
-
-            for (mut color, coordinates) in &mut color_query {
-                if (coordinates.x == curr_coordinates.x + 1
-                    || coordinates.x == curr_coordinates.x - 1)
-                    && (coordinates.y == curr_coordinates.y)
-                    || (coordinates.y == curr_coordinates.y + 1
-                        || coordinates.y == curr_coordinates.y - 1)
-                        && (coordinates.x == curr_coordinates.x)
-                {
-                    *color = RED_BUTTON.into();
-                }
-            }
-        }
-    }
-}
-
-pub fn print_touching_buttons(
-    //mut commands: Commands,
-    button_query: Query<(Entity, &Coordinates), With<Button>>,
-    interaction_query: Query<&Interaction, Changed<Interaction>>,
-) {
-    for (entity, coordinates) in button_query.iter() {
-        if let Ok(interaction) = interaction_query.get(entity) {
-            if *interaction == Interaction::Clicked {
-                println!("Clicked button at ({}, {})", coordinates.x, coordinates.y);
-                let curr_coordinates = coordinates.clone();
-                for (_, coordinates) in button_query.iter() {
-                    if (coordinates.x == curr_coordinates.x + 1
-                        || coordinates.x == curr_coordinates.x - 1)
-                        && (coordinates.y == curr_coordinates.y)
-                        || (coordinates.y == curr_coordinates.y + 1
-                            || coordinates.y == curr_coordinates.y - 1)
-                            && (coordinates.x == curr_coordinates.x)
-                    {
-                        println!(
-                            "Button at ({}, {}) touches clicked button",
-                            coordinates.x, coordinates.y
-                        );
-                    }
-                }
-            }
-        }
-    }
-}*/

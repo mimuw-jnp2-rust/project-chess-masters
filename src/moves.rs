@@ -5,16 +5,12 @@ use crate::coordinates::*;
 fn ok_king_knight_move(coords: &Coordinates, board: &Board, color: PieceColor) -> bool {
     if let Some(field) = board.get_field(*coords) {
         if let Some(some_piece) = &field.piece {
-            if some_piece.piece_color == color {
-                return false;
-            } else {
-                return true;
-            }
+            some_piece.piece_color != color
         } else {
-            return true;
+            true
         }
     } else {
-        return false;
+        false
     }
 }
 

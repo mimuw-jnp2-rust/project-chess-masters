@@ -39,17 +39,11 @@ impl Display for Coordinates {
 }
 
 pub fn mouse_pos_to_coordinates(x: f32, y: f32, width: f32, height: f32) -> Coordinates {
-    //println!("Old mouse position {} {}", x, y);
-    //println!("width: {}", width);
-    //println!("width: {}", height);
-
-    let left_down_x = ((width as f32) / 2.0) - ((BOARD_SIZE as f32 * FIELD_SIZE) / 2.0); // czy to dobrze? może nie?
+    let left_down_x = ((width as f32) / 2.0) - ((BOARD_SIZE as f32 * FIELD_SIZE) / 2.0);
     let left_down_y = ((height as f32) / 2.0) - ((BOARD_SIZE as f32 * FIELD_SIZE) / 2.0);
-    //println!("left_down_x: {}", left_down_x);
-    //println!("left_down_y: {}", left_down_y);
     Coordinates {
-        x: 1 + ((x - left_down_x) / FIELD_SIZE) as i32,
-        y: 1 + ((y - left_down_y) / FIELD_SIZE) as i32,
+        x: ((x - left_down_x) / FIELD_SIZE as f32).floor() as i32 + 1,
+        y: ((y - left_down_y) / FIELD_SIZE as f32).floor() as i32 + 1,
     }
 }
 

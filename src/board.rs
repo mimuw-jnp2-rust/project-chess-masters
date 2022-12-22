@@ -1,4 +1,3 @@
-//use crate::chess_pieces::*;
 use crate::field::*;
 use crate::*;
 
@@ -34,30 +33,8 @@ fn starting_piece_from_coordinates(coordinates: Coordinates) -> Option<Piece> {
 impl Board {
     pub fn empty() -> Board {
         let fields: Vec<Vec<Field>> = Vec::new();
-        Board { fields: fields }
+        Board { fields }
     }
-    /*pub fn new() -> Board {
-        let mut fields: Vec<Vec<Field>> = Vec::new();
-        for i in 0..BOARD_SIZE {
-            let mut row: Vec<Field> = Vec::new();
-            for j in 0..BOARD_SIZE {
-                let coordinates = Coordinates {
-                    x: j as i32 + 1,
-                    y: i as i32 + 1,
-                };
-                let color = if (i + j) % 2 == 0 {
-                    FieldColor::Black
-                } else {
-                    FieldColor::White
-                };
-                let piece = starting_piece_from_coordinates(coordinates);
-                let fake_entity
-                row.push(Field::new(, coordinates, color, piece));
-            }
-            fields.push(row);
-        }
-        Board { fields: fields }
-    }*/
 
     pub fn print_board(&self) {
         for i in 0..BOARD_SIZE {
@@ -132,17 +109,13 @@ impl Board {
     }
 
     pub fn set_field_entity(&mut self, coordinates: Coordinates, entity: Entity) {
-        match self.get_field_mut(coordinates) {
-            Some(field) => field.entity = entity,
-            None => {}
+        if let Some(field) = self.get_field_mut(coordinates) {
+            field.entity = entity;
         }
     }
 
     pub fn get_field_entity(&self, coordinates: Coordinates) -> Option<Entity> {
-        match self.get_field(coordinates) {
-            Some(field) => Some(field.entity),
-            None => None,
-        }
+        self.get_field(coordinates).map(|field| field.entity)
     }
 
     pub fn get_piece_entity(&self, coordinates: Coordinates) -> Option<Entity> {
@@ -156,12 +129,10 @@ impl Board {
     }
 
     pub fn set_piece_entity(&mut self, coordinates: Coordinates, entity: Entity) {
-        match self.get_field_mut(coordinates) {
-            Some(field) => match &mut field.piece {
-                Some(piece) => piece.entity = Some(entity),
-                None => {}
-            },
-            None => {}
+        if let Some(field) = self.get_field_mut(coordinates) {
+            if let Some(piece) = &mut field.piece {
+                piece.entity = Some(entity);
+            }
         }
     }
 }
@@ -174,7 +145,7 @@ impl Plugin for BoardPlugin {
     }
 }
 
-pub fn spawn_piece(
+fn spawn_piece(
     commands: &mut Commands,
     mut piece: &mut Piece,
     image: Handle<Image>,
@@ -240,7 +211,7 @@ pub fn board_spawn_system(
 
             let mut field = Field {
                 entity: field_id,
-                coordinates: coordinates,
+                coordinates,
                 color: field_color,
                 piece: piece.clone(),
             };
