@@ -15,7 +15,7 @@ pub enum PieceType {
     Rook,
     Bishop,
     Knight,
-    Pawn,
+    Pawn { moved: bool },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Component)]
@@ -52,7 +52,7 @@ impl core::fmt::Display for Piece {
                     PieceType::Rook => "♖",
                     PieceType::Knight => "♘",
                     PieceType::Bishop => "♗",
-                    PieceType::Pawn => "♙",
+                    PieceType::Pawn { .. } => "♙",
                 },
                 PieceColor::White => match self.piece_type {
                     PieceType::King => "♚",
@@ -60,7 +60,7 @@ impl core::fmt::Display for Piece {
                     PieceType::Rook => "♜",
                     PieceType::Knight => "♞",
                     PieceType::Bishop => "♝",
-                    PieceType::Pawn => "♟︎",
+                    PieceType::Pawn { .. } => "♟︎",
                 },
             }
         )
@@ -86,7 +86,7 @@ impl Piece {
             PieceType::Rook => println!("Rook at ({})", self.coordinates),
             PieceType::Bishop => println!("Bishop at ({})", self.coordinates),
             PieceType::Knight => println!("Knight at ({})", self.coordinates),
-            PieceType::Pawn => println!("Pawn at ({})", self.coordinates),
+            PieceType::Pawn { .. } => println!("Pawn at ({})", self.coordinates),
         }
     }
 
@@ -98,7 +98,7 @@ impl Piece {
             PieceType::Rook => "Rook",
             PieceType::Bishop => "Bishop",
             PieceType::Knight => "Knight",
-            PieceType::Pawn => "Pawn",
+            PieceType::Pawn { .. } => "Pawn",
         }
     }
 

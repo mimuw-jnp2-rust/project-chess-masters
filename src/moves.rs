@@ -14,27 +14,37 @@ fn ok_king_knight_move(coords: &Coordinates, board: &Board, color: PieceColor) -
     }
 }
 
-fn get_pawn_moves(piece: &Piece, board: &Board) -> Vec<Coordinates> {
-    let directions;
-    let dest;
-    let mut result: Vec<Coordinates> = Vec::new();
-    if piece.piece_color == PieceColor::White {
-        dest = Coordinates {
-            x: piece.coordinates.x,
-            y: piece.coordinates.y + 1,
-        };
-        directions = vec![(-1, -1), (1, -1)];
-    } else {
-        dest = Coordinates {
-            x: piece.coordinates.x,
-            y: piece.coordinates.y - 1,
-        };
-        directions = vec![(-1, 1), (1, 1)];
-    }
+fn add_if_empty(dest: Coordinates, board: &Board, result: &mut Vec<Coordinates>) {
     if let Some(field) = board.get_field(dest) {
         if field.piece.is_none() {
             result.push(dest);
         }
+    }
+}
+
+fn add_forward_moves(piece: &Piece, board: &Board, result: &mut Vec<Coordinates>, dir: i32) {
+    let dest = Coordinates {
+        x: piece.coordinates.x,
+        y: piece.coordinates.y + dir,
+    };
+    add_if_empty(dest, board, result);
+    if let PieceType::Pawn { moved } = piece.piece_type {
+        if !moved {
+            let dest2 = dest + Coordinates { x: 0, y: dir };
+            add_if_empty(dest2, board, result);
+        }
+    }
+}
+
+fn get_pawn_moves(piece: &Piece, board: &Board) -> Vec<Coordinates> {
+    let directions;
+    let mut result: Vec<Coordinates> = Vec::new();
+    if piece.piece_color == PieceColor::White {
+        add_forward_moves(piece, board, &mut result, 1);
+        directions = vec![(-1, 1), (1, 1)];
+    } else {
+        add_forward_moves(piece, board, &mut result, -1);
+        directions = vec![(-1, -1), (1, -1)];
     }
 
     let dirs_iter = directions.iter();

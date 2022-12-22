@@ -13,9 +13,9 @@ fn starting_piece_from_coordinates(coordinates: Coordinates) -> Option<Piece> {
     } else {
         return None;
     };
-
+,
     let piece_type = if coordinates.y == 2 || coordinates.y == 7 {
-        PieceType::Pawn
+        PieceType::Pawn { moved: false }
     } else if coordinates.x == 1 || coordinates.x == 8 {
         PieceType::Rook
     } else if coordinates.x == 2 || coordinates.x == 7 {
