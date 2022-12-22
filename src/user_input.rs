@@ -45,7 +45,7 @@ fn handle_piece_move(
             .move_piece(piece.coordinates, clicked_coords);
         piece.coordinates = clicked_coords;
 
-        game_state.board.print_board();
+        // game_state.board.print_board();
     }
 }
 
@@ -105,7 +105,7 @@ fn handle_field_click(
                 clear_board(game_state, game_textures, piece_query, field_query);
                 return;
             }
-            println!("Clicked on own piece");
+            // println!("Clicked on own piece");
             let piece = clicked_field.piece.clone().unwrap();
             let clicked_id = piece.entity.unwrap();
             select_piece(game_state, game_textures, piece_query, clicked_id);
@@ -169,7 +169,7 @@ fn handle_user_input(
 
             if let Some(pos) = window.cursor_position() {
                 let clicked_coords = mouse_pos_to_coordinates(pos.x, pos.y, width, height);
-                println!("clicked_coords = {}", clicked_coords);
+                //println!("clicked_coords = {}", clicked_coords);
 
                 if game_state.board.get_field(clicked_coords).is_some() {
                     handle_field_click(
