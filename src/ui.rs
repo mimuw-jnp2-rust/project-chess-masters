@@ -14,7 +14,14 @@ impl GameTextures {
         GameTextures {
             white_images_map: HashMap::from([
                 (
-                    PieceType::Pawn,
+                    PieceType::Pawn { moved: false },
+                    (
+                        asset_server.load(WHITE_PAWN_SPRITE),
+                        asset_server.load(BORDERED_WHITE_PAWN_SPRITE),
+                    ),
+                ),
+                (
+                    PieceType::Pawn { moved: true },
                     (
                         asset_server.load(WHITE_PAWN_SPRITE),
                         asset_server.load(BORDERED_WHITE_PAWN_SPRITE),
@@ -58,7 +65,14 @@ impl GameTextures {
             ]),
             black_images_map: HashMap::from([
                 (
-                    PieceType::Pawn,
+                    PieceType::Pawn { moved: false },
+                    (
+                        asset_server.load(BLACK_PAWN_SPRITE),
+                        asset_server.load(BORDERED_BLACK_PAWN_SPRITE),
+                    ),
+                ),
+                (
+                    PieceType::Pawn { moved: true },
                     (
                         asset_server.load(BLACK_PAWN_SPRITE),
                         asset_server.load(BORDERED_BLACK_PAWN_SPRITE),

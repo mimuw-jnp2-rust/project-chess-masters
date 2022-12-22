@@ -37,15 +37,14 @@ fn add_forward_moves(piece: &Piece, board: &Board, result: &mut Vec<Coordinates>
 }
 
 fn get_pawn_moves(piece: &Piece, board: &Board) -> Vec<Coordinates> {
-    let directions;
     let mut result: Vec<Coordinates> = Vec::new();
-    if piece.piece_color == PieceColor::White {
+    let directions = if piece.piece_color == PieceColor::White {
         add_forward_moves(piece, board, &mut result, 1);
-        directions = vec![(-1, 1), (1, 1)];
+        vec![(-1, 1), (1, 1)]
     } else {
         add_forward_moves(piece, board, &mut result, -1);
-        directions = vec![(-1, -1), (1, -1)];
-    }
+        vec![(-1, -1), (1, -1)]
+    };
 
     let dirs_iter = directions.iter();
     for pair in dirs_iter {

@@ -109,4 +109,15 @@ impl Piece {
     pub fn set_entity(&mut self, entity: Entity) {
         self.entity = Some(entity);
     }
+
+    pub fn get_value(&self) -> i32 {
+        match self.piece_type {
+            PieceType::King => 1000,
+            PieceType::Queen => 9,
+            PieceType::Rook => 5,
+            PieceType::Bishop => 3,
+            PieceType::Knight => 3,
+            PieceType::Pawn { .. } => 1,
+        }
+    }
 }

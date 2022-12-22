@@ -59,7 +59,6 @@ pub struct GameState {
     pub board: Board,
     pub white: bool,
     pub selected_entity: Option<Entity>,
-    pub selected_entity: Option<Entity>,
 }
 
 pub fn get_image(piece: &Piece, game_textures: &Res<GameTextures>) -> Handle<Image> {

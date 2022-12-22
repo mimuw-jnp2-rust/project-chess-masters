@@ -36,6 +36,9 @@ fn handle_piece_move(
             commands.entity(piece.entity.unwrap()).despawn();
         }
         new_field.piece = Some(piece.clone());
+        if (piece.piece_type == PieceType::Pawn { moved: false }) {
+            piece.piece_type = PieceType::Pawn { moved: true };
+        }
 
         move_piece_sprite(transform, piece.coordinates, clicked_coords);
 
