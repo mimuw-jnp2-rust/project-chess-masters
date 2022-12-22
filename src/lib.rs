@@ -3,14 +3,14 @@ use board::*;
 use chess_pieces::*;
 use coordinates::Coordinates;
 use std::collections::HashMap;
+use ui::GameTextures;
 
-// use coordinates::*;
 pub mod board;
 pub mod chess_pieces;
-pub mod components;
 pub mod coordinates;
 pub mod field;
 pub mod moves;
+pub mod ui;
 pub mod user_input;
 
 pub const WINDOW_WIDTH: f32 = 800.0;
@@ -54,13 +54,6 @@ pub const BLACK_KING_SPRITE: &str = "128px/b_king_png_shadow_128px.png";
 pub const BORDERED_BLACK_KING_SPRITE: &str = "128px/b_king_bordered.png";
 pub const RONALDO: &str = "ronaldo.png";
 
-#[derive(Resource, Default)]
-pub struct GameTextures {
-    pub white_images_map: HashMap<PieceType, (Handle<Image>, Handle<Image>)>,
-    pub black_images_map: HashMap<PieceType, (Handle<Image>, Handle<Image>)>,
-    pub error_image: Handle<Image>,
-}
-
 #[derive(Resource)]
 pub struct GameState {
     pub board: Board,
@@ -69,20 +62,19 @@ pub struct GameState {
 }
 
 pub fn get_image(piece: &Piece, game_textures: &Res<GameTextures>) -> Handle<Image> {
-    let maybe_image;
-    if piece.piece_color == PieceColor::White {
-        maybe_image = game_textures.white_images_map.get(&piece.piece_type);
+    let maybe_image = if piece.piece_color == PieceColor::White {
+        game_textures.white_images_map.get(&piece.piece_type)
     } else {
-        maybe_image = game_textures.black_images_map.get(&piece.piece_type);
+        game_textures.black_images_map.get(&piece.piece_type)
     };
     match maybe_image {
         Some(image_pair) => {
             if piece.border {
-                return image_pair.1.clone();
+                image_pair.1.clone()
             } else {
-                return image_pair.0.clone();
+                image_pair.0.clone()
             }
         }
-        None => return game_textures.error_image.clone(),
+        None => game_textures.error_image.clone(),
     }
 }

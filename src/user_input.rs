@@ -1,6 +1,7 @@
 use crate::coordinates::{mouse_pos_to_coordinates, Coordinates};
 use crate::field::Field;
 use crate::moves::*;
+use crate::ui::GameTextures;
 use crate::*;
 use bevy::input::{mouse::*, ButtonState};
 
@@ -59,7 +60,7 @@ fn handle_piece_choice(
     let query_item = (query_item.0, query_item.2);
     let (mut image, mut piece) = query_item;
     piece.border = select;
-    *image = get_image(&piece, &game_textures);
+    *image = get_image(&piece, game_textures);
     if select {
         game_state.selected_entity = Some(entity);
     } else {
@@ -101,9 +102,7 @@ fn handle_field_click(
                 == game_state.white
         {
             if clicked_field.piece.clone().unwrap().entity.unwrap() == selected_id {
-                //unselect_piece(game_state, game_textures, piece_query, selected_id);
                 clear_board(game_state, game_textures, piece_query, field_query);
-                //println!("Clearing board because of double click");
                 return;
             }
             println!("Clicked on own piece");
@@ -140,8 +139,8 @@ fn clear_board(
 ) {
     for (mut sprite_field, field) in field_query.iter_mut() {
         match field.color {
-            field::FieldColor::White => (*sprite_field).color = WHITE_FIELD,
-            field::FieldColor::Black => (*sprite_field).color = BLACK_FIELD,
+            field::FieldColor::White => sprite_field.color = WHITE_FIELD,
+            field::FieldColor::Black => sprite_field.color = BLACK_FIELD,
         };
     }
 
@@ -172,7 +171,7 @@ fn handle_user_input(
                 let clicked_coords = mouse_pos_to_coordinates(pos.x, pos.y, width, height);
                 println!("clicked_coords = {}", clicked_coords);
 
-                if let Some(_) = game_state.board.get_field(clicked_coords) {
+                if game_state.board.get_field(clicked_coords).is_some() {
                     handle_field_click(
                         &mut commands,
                         &mut game_state,
@@ -198,9 +197,9 @@ fn handle_user_input(
 fn reset_fields_to_default(field_query: &mut Query<(&mut Sprite, &Field)>) {
     for (mut sprite_field, field) in field_query.iter_mut() {
         match field.color {
-            field::FieldColor::White => (*sprite_field).color = WHITE_FIELD,
-            field::FieldColor::Black => (*sprite_field).color = BLACK_FIELD,
-        };
+            field::FieldColor::White => sprite_field.color = WHITE_FIELD,
+            field::FieldColor::Black => sprite_field.color = BLACK_FIELD,
+        }
     }
 }
 
@@ -209,12 +208,12 @@ fn highlight_fields(
     field_query: &mut Query<(&mut Sprite, &Field)>,
     game_state: &Res<GameState>,
 ) {
-    let possible_moves = get_possible_moves(&piece, &game_state.board);
+    let possible_moves = get_possible_moves(piece, &game_state.board);
     for (mut sprite_field, field) in field_query.iter_mut() {
         if possible_moves.contains(&field.coordinates) {
             match field.color {
-                field::FieldColor::White => (*sprite_field).color = LIGHT_GRAY,
-                field::FieldColor::Black => (*sprite_field).color = DARK_GRAY,
+                field::FieldColor::White => sprite_field.color = LIGHT_GRAY,
+                field::FieldColor::Black => sprite_field.color = DARK_GRAY,
             }
         }
     }
@@ -236,12 +235,16 @@ fn highlight_moves_on_click(
             }
             reset_fields_to_default(&mut field_query);
 
+            if game_state.selected_entity.is_none() {
+                return;
+            }
+
             if let Some(pos) = window.cursor_position() {
                 let clicked_coords = mouse_pos_to_coordinates(pos.x, pos.y, width, height);
                 if let Some(clicked_field) = game_state.board.get_field(clicked_coords) {
                     if let Some(piece) = &clicked_field.piece {
                         if (piece.piece_color == PieceColor::White) == game_state.white {
-                            highlight_fields(&piece, &mut field_query, &game_state);
+                            highlight_fields(piece, &mut field_query, &game_state);
                         }
                     }
                 }
@@ -250,7 +253,6 @@ fn highlight_moves_on_click(
     }
 }
 
-// create plugin for user input
 pub struct UserInputPlugin;
 
 impl Plugin for UserInputPlugin {

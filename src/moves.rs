@@ -47,7 +47,7 @@ fn get_pawn_moves(piece: &Piece, board: &Board) -> Vec<Coordinates> {
         if let Some(field) = board.get_field(dest) {
             if let Some(some_piece) = &field.piece {
                 if some_piece.piece_color != piece.piece_color {
-                    result.push(dest.clone());
+                    result.push(dest);
                 }
             }
         }
@@ -62,12 +62,12 @@ fn get_knight_moves(piece: &Piece, board: &Board) -> Vec<Coordinates> {
     let mul_iter = mul.iter();
     for pair in mul_iter {
         result.push(Coordinates {
-            x: piece.coordinates.x + 1 * pair.0,
+            x: piece.coordinates.x + pair.0,
             y: piece.coordinates.y + 2 * pair.1,
         });
         result.push(Coordinates {
             x: piece.coordinates.x + 2 * pair.0,
-            y: piece.coordinates.y + 1 * pair.1,
+            y: piece.coordinates.y + pair.1,
         });
     }
     result
@@ -124,12 +124,12 @@ fn get_rook_bishop_moves(
             if let Some(field) = board.get_field(coords) {
                 if let Some(some_piece) = &field.piece {
                     if some_piece.piece_color != piece.piece_color {
-                        result.push(coords.clone());
+                        result.push(coords);
                     }
                     break;
                 }
             }
-            result.push(coords.clone());
+            result.push(coords);
             coords = Coordinates {
                 x: coords.x + pair.0,
                 y: coords.y + pair.1,
@@ -151,11 +151,11 @@ fn get_bishop_moves(piece: &Piece, board: &Board) -> Vec<Coordinates> {
 
 pub fn get_possible_moves(piece: &Piece, board: &Board) -> Vec<Coordinates> {
     match piece.piece_type {
-        PieceType::King { .. } => return get_king_moves(piece, board),
-        PieceType::Queen { .. } => return get_queen_moves(piece, board),
-        PieceType::Rook { .. } => return get_rook_moves(piece, board),
-        PieceType::Bishop { .. } => return get_bishop_moves(piece, board),
-        PieceType::Knight { .. } => return get_knight_moves(piece, board),
-        PieceType::Pawn { .. } => return get_pawn_moves(piece, board),
+        PieceType::King { .. } => get_king_moves(piece, board),
+        PieceType::Queen { .. } => get_queen_moves(piece, board),
+        PieceType::Rook { .. } => get_rook_moves(piece, board),
+        PieceType::Bishop { .. } => get_bishop_moves(piece, board),
+        PieceType::Knight { .. } => get_knight_moves(piece, board),
+        PieceType::Pawn { .. } => get_pawn_moves(piece, board),
     }
 }
