@@ -195,7 +195,6 @@ pub fn board_spawn_system(
             };
 
             let piece = starting_piece_from_coordinates(coordinates);
-            //let piece = game_state.board.fields[i][j].piece.clone();
 
             let field_id = commands
                 .spawn(SpriteBundle {
@@ -219,13 +218,9 @@ pub fn board_spawn_system(
                 piece: piece.clone(),
             };
 
-            //game_state.board.set_field_entity(coordinates, field_id);
-
             if let Some(mut piece) = piece {
                 let image = get_image(&piece, &game_textures);
-
-                spawn_piece(&mut commands, &mut piece, image, Vec2 { x: (x), y: (y) });
-                // game_state.board.set_piece_entity(coordinates, piece_id);
+                spawn_piece(&mut commands, &mut piece, image, Vec2 { x, y });
                 field.piece = Some(piece);
             }
 

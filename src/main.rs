@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy::winit::WinitSettings;
 use chess_masters::board::*;
 use chess_masters::ui::{GameTextures, UserInterfacePlugin};
 use chess_masters::user_input::UserInputPlugin;
@@ -32,7 +31,7 @@ fn main() {
         .add_plugin(UserInputPlugin)
         .add_plugin(UserInterfacePlugin)
         .insert_resource(ClearColor(SADDLE_BROWN))
-        .insert_resource(WinitSettings::desktop_app())
+        //.insert_resource(WinitSettings::desktop_app())
         .add_startup_system(setup)
         .run();
 }
