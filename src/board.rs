@@ -1,8 +1,12 @@
 use crate::field::*;
+use crate::moves::get_possible_moves;
 use crate::*;
 
+#[derive(Debug, Component, Clone, PartialEq, Eq)]
 pub struct Board {
     pub fields: Vec<Vec<Field>>,
+    pub white_king_pos: Coordinates,
+    pub black_king_pos: Coordinates,
 }
 
 fn starting_piece_from_coordinates(coordinates: Coordinates) -> Option<Piece> {
@@ -33,7 +37,11 @@ fn starting_piece_from_coordinates(coordinates: Coordinates) -> Option<Piece> {
 impl Board {
     pub fn empty() -> Board {
         let fields: Vec<Vec<Field>> = Vec::new();
-        Board { fields }
+        Board {
+            fields: fields,
+            white_king_pos: Coordinates { x: 5, y: 1 },
+            black_king_pos: Coordinates { x: 5, y: 8 },
+        }
     }
 
     pub fn print_board(&self) {
@@ -78,6 +86,56 @@ impl Board {
         }
     }
 
+    // iterates through all fields. If there is an enemy piece, check if
+    // it could take the king
+    pub fn king_in_danger(&self, my_color: PieceColor, king_position: &Coordinates) -> bool {
+        for row in &self.fields {
+            for field in row {
+                if let Some(some_piece) = &field.piece {
+                    if some_piece.piece_color != my_color {
+                        let possible_moves = get_possible_moves(some_piece, &self, false);
+                        if possible_moves.contains(king_position) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    pub fn is_check_after_move(
+        &self,
+        from: &Coordinates,
+        to: &Coordinates,
+        my_color: PieceColor,
+    ) -> bool {
+        // clone fields here, don't see better option...
+
+        //println!("wchodzimy do is check after move");
+        let mut dummy_board: Board = self.clone();
+        if !dummy_board.move_piece(from.clone(), to.clone()) {
+            panic!("Something went wrong! Can't make a dummy move");
+        }
+
+        //println!("slonowaliśmy i zrobiliśmy ruch");
+        let mut king_position = &dummy_board.white_king_pos;
+        if my_color == PieceColor::Black {
+            king_position = &dummy_board.black_king_pos;
+        }
+
+        let my_king_in_danger: bool;
+        match my_color {
+            PieceColor::White => {
+                my_king_in_danger = dummy_board.king_in_danger(PieceColor::White, king_position);
+            }
+            PieceColor::Black => {
+                my_king_in_danger = dummy_board.king_in_danger(PieceColor::Black, king_position);
+            }
+        }
+        my_king_in_danger
+    }
+
     pub fn remove_piece(&mut self, coordinates: Coordinates) -> Option<Piece> {
         match self.get_field_mut(coordinates) {
             Some(field) => {
@@ -90,6 +148,9 @@ impl Board {
     }
 
     pub fn move_piece(&mut self, from: Coordinates, to: Coordinates) -> bool {
+        let mut white_king_moved = false;
+        let mut black_king_moved = false;
+        let mut ok = true;
         let piece = self.remove_piece(from);
         match piece {
             Some(piece) => {
@@ -101,14 +162,27 @@ impl Board {
                         if piece.piece_type == (PieceType::Pawn { moved: false }) {
                             piece.piece_type = PieceType::Pawn { moved: true };
                         }
+                        if piece.piece_type == PieceType::King {
+                            if piece.piece_color == PieceColor::White {
+                                white_king_moved = true;
+                            } else {
+                                black_king_moved = true;
+                            }
+                        }
                         field.piece = Some(piece);
-                        true
                     }
-                    None => false,
+                    None => ok = false,
                 }
             }
-            None => false,
+            None => ok = false,
         }
+        if white_king_moved {
+            self.white_king_pos = to;
+        }
+        if black_king_moved {
+            self.black_king_pos = to;
+        }
+        ok
     }
 
     pub fn set_field_entity(&mut self, coordinates: Coordinates, entity: Entity) {

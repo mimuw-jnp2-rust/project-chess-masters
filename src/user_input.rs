@@ -21,7 +21,7 @@ fn handle_piece_move(
     let query_item = piece_query.get_mut(selected_entity);
     let (_, transform, mut piece) = query_item.unwrap();
 
-    let possible_moves = get_possible_moves(&piece, &game_state.board);
+    let possible_moves = get_possible_moves(&piece, &game_state.board, true);
     if possible_moves.contains(&clicked_coords) {
         let old_field_id = game_state.board.get_field_entity(piece.coordinates);
         let old_field_query_item = field_query.get_mut(old_field_id.unwrap());
@@ -211,7 +211,7 @@ fn highlight_fields(
     field_query: &mut Query<(&mut Sprite, &Field)>,
     game_state: &Res<GameState>,
 ) {
-    let possible_moves = get_possible_moves(piece, &game_state.board);
+    let possible_moves = get_possible_moves(piece, &game_state.board, true);
     for (mut sprite_field, field) in field_query.iter_mut() {
         if possible_moves.contains(&field.coordinates) {
             match field.color {
