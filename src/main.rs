@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use chess_masters::board::*;
+use chess_masters::game_over::*;
 use chess_masters::ui::{GameTextures, UserInterfacePlugin};
 use chess_masters::user_input::UserInputPlugin;
 use chess_masters::*;
@@ -13,6 +14,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         white: true,
         board: Board::empty(),
         selected_entity: None,
+        winner: None,
     });
 }
 
@@ -27,6 +29,8 @@ fn main() {
             },
             ..default()
         }))
+        .add_state(GlobalState::InGame) // later change to MainMenu
+        .add_system_set(SystemSet::on_enter(GlobalState::GameOver).with_system(spawn_game_over))
         .add_plugin(BoardPlugin)
         .add_plugin(UserInputPlugin)
         .add_plugin(UserInterfacePlugin)

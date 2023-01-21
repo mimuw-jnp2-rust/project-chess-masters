@@ -17,6 +17,7 @@ fn handle_piece_move(
     field_query: &mut Query<(&mut Sprite, &mut Field)>,
     selected_entity: Entity,
     clicked_coords: Coordinates,
+    state: &mut ResMut<State<GlobalState>>,
 ) {
     let query_item = piece_query.get_mut(selected_entity);
     let (_, transform, mut piece) = query_item.unwrap();
@@ -42,13 +43,29 @@ fn handle_piece_move(
 
         move_piece_sprite(transform, piece.coordinates, clicked_coords);
 
-        game_state.white = !game_state.white;
+        game_state.white = !game_state.white; // end of move
         let _ = &game_state
             .board
             .move_piece(piece.coordinates, clicked_coords);
         piece.coordinates = clicked_coords;
 
-        // game_state.board.print_board();
+        // check for winner or draw
+        let mut color = PieceColor::White;
+        let mut maybe_winner = PieceColor::Black;
+        if !game_state.white {
+            color = PieceColor::Black;
+            maybe_winner = PieceColor::White;
+        }
+
+        if game_state.board.no_possible_moves(color) {
+            if game_state.board.king_in_danger(color) {
+                println!("Game over!"); // change state :/
+                game_state.winner = Some(maybe_winner);
+            } else {
+                println!("Draw!");
+            }
+            state.set(GlobalState::GameOver).unwrap();
+        }
     }
 }
 
@@ -96,6 +113,7 @@ fn handle_field_click(
     clicked_coords: Coordinates,
     piece_query: &mut Query<(&mut Handle<Image>, &mut Transform, &mut Piece)>,
     field_query: &mut Query<(&mut Sprite, &mut Field)>,
+    state: &mut ResMut<State<GlobalState>>,
 ) {
     if let Some(selected_id) = game_state.selected_entity {
         clear_board(game_state, game_textures, piece_query, field_query);
@@ -120,6 +138,7 @@ fn handle_field_click(
                 field_query,
                 selected_id,
                 clicked_coords,
+                state,
             );
         }
     } else {
@@ -160,6 +179,7 @@ fn handle_user_input(
     mut field_query: Query<(&mut Sprite, &mut Field)>,
     game_textures: Res<GameTextures>,
     mut game_state: ResMut<GameState>,
+    mut state: ResMut<State<GlobalState>>,
 ) {
     let window = windows.get_primary().unwrap();
     let (height, width) = (window.height(), window.width());
@@ -182,6 +202,7 @@ fn handle_user_input(
                         clicked_coords,
                         &mut piece_query,
                         &mut field_query,
+                        &mut state,
                     );
                 } else {
                     println!("Opps, clicked outside the board");
