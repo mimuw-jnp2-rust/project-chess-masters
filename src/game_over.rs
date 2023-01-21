@@ -3,10 +3,9 @@ use crate::*;
 pub fn spawn_game_over(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    windows: Res<Windows>,
     game_state: ResMut<GameState>,
 ) {
-    spawn_button(&mut commands, &asset_server, windows);
+    spawn_button(&mut commands, &asset_server);
     spawn_text(&mut commands, &asset_server, game_state);
 }
 
@@ -39,11 +38,7 @@ pub fn spawn_text(
     },));
 }
 
-pub fn spawn_button(
-    commands: &mut Commands,
-    asset_server: &Res<AssetServer>,
-    windows: Res<Windows>,
-) {
+pub fn spawn_button(commands: &mut Commands, asset_server: &Res<AssetServer>) {
     commands
         .spawn(ButtonBundle {
             style: Style {
