@@ -9,6 +9,7 @@ pub mod board;
 pub mod chess_pieces;
 pub mod coordinates;
 pub mod field;
+pub mod game_over;
 pub mod moves;
 pub mod ui;
 pub mod user_input;
@@ -17,6 +18,10 @@ pub const WINDOW_WIDTH: f32 = 800.0;
 pub const WINDOW_HEIGHT: f32 = 800.0;
 pub const FIELD_SIZE: f32 = 70.0;
 pub const BOARD_SIZE: usize = 8;
+pub const PLAY_AGAIN_BUTTON_WIDTH: f32 = 100.0;
+pub const PLAY_AGAIN_BUTTON_HEIGHT: f32 = 50.0;
+
+pub const PLAY_AGAIN_COL: Color = Color::rgb(216.0 / 255.0, 77.0 / 255.0, 123.0 / 255.0);
 
 pub const HOVERED_BUTTON: Color = Color::rgb(0.25, 0.25, 0.25);
 pub const PRESSED_BUTTON: Color = Color::rgb(0.35, 0.75, 0.35);
@@ -59,6 +64,14 @@ pub struct GameState {
     pub board: Board,
     pub white: bool,
     pub selected_entity: Option<Entity>,
+    pub winner: Option<PieceColor>,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+pub enum GlobalState {
+    MainMenu,
+    InGame,
+    GameOver,
 }
 
 pub fn get_image(piece: &Piece, game_textures: &Res<GameTextures>) -> Handle<Image> {

@@ -164,7 +164,16 @@ fn init_next_move_text(mut commands: Commands, asset_server: ResMut<AssetServer>
                 font_size: 60.0,
                 color: Color::GOLD,
             }),
-        ]),
+        ])
+        .with_style(Style {
+            position_type: PositionType::Absolute,
+            position: UiRect {
+                top: Val::Px(5.0),
+                left: Val::Px(50.0),
+                ..default()
+            },
+            ..default()
+        }),
         FpsText,
     ));
 }

@@ -88,7 +88,8 @@ impl Board {
 
     // iterates through all fields. If there is an enemy piece, check if
     // it could take the king
-    pub fn king_in_danger(&self, my_color: PieceColor, king_position: &Coordinates) -> bool {
+    pub fn king_in_danger(&self, my_color: PieceColor) -> bool {
+        let king_position = &self.get_king_position(my_color);
         for row in &self.fields {
             for field in row {
                 if let Some(some_piece) = &field.piece {
@@ -104,6 +105,29 @@ impl Board {
         return false;
     }
 
+    pub fn no_possible_moves(&self, my_color: PieceColor) -> bool {
+        let mut all_moves = Vec::new();
+        for row in &self.fields {
+            for field in row {
+                if let Some(some_piece) = &field.piece {
+                    if some_piece.piece_color == my_color {
+                        let mut possible_moves = get_possible_moves(some_piece, &self, true);
+                        all_moves.append(&mut possible_moves);
+                    }
+                }
+            }
+        }
+        all_moves.is_empty()
+    }
+
+    fn get_king_position(&self, my_color: PieceColor) -> Coordinates {
+        let mut king_position = self.white_king_pos;
+        if my_color == PieceColor::Black {
+            king_position = self.black_king_pos;
+        }
+        king_position
+    }
+
     pub fn is_check_after_move(
         &self,
         from: &Coordinates,
@@ -112,25 +136,18 @@ impl Board {
     ) -> bool {
         // clone fields here, don't see better option...
 
-        //println!("wchodzimy do is check after move");
         let mut dummy_board: Board = self.clone();
         if !dummy_board.move_piece(from.clone(), to.clone()) {
             panic!("Something went wrong! Can't make a dummy move");
         }
 
-        //println!("slonowaliśmy i zrobiliśmy ruch");
-        let mut king_position = &dummy_board.white_king_pos;
-        if my_color == PieceColor::Black {
-            king_position = &dummy_board.black_king_pos;
-        }
-
         let my_king_in_danger: bool;
         match my_color {
             PieceColor::White => {
-                my_king_in_danger = dummy_board.king_in_danger(PieceColor::White, king_position);
+                my_king_in_danger = dummy_board.king_in_danger(PieceColor::White);
             }
             PieceColor::Black => {
-                my_king_in_danger = dummy_board.king_in_danger(PieceColor::Black, king_position);
+                my_king_in_danger = dummy_board.king_in_danger(PieceColor::Black);
             }
         }
         my_king_in_danger
@@ -211,14 +228,6 @@ impl Board {
                 piece.entity = Some(entity);
             }
         }
-    }
-}
-
-pub struct BoardPlugin;
-
-impl Plugin for BoardPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_startup_system_to_stage(StartupStage::PostStartup, board_spawn_system);
     }
 }
 
@@ -307,4 +316,12 @@ pub fn board_spawn_system(
         y += FIELD_SIZE;
     }
     game_state.board.fields = fields;
+}
+
+pub struct BoardPlugin;
+
+impl Plugin for BoardPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_startup_system_to_stage(StartupStage::PostStartup, board_spawn_system);
+    }
 }
