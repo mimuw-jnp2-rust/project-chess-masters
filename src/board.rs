@@ -176,6 +176,7 @@ impl Board {
                     Some(field) => {
                         let mut piece = piece;
                         piece.coordinates = to;
+
                         if piece.piece_type == (PieceType::Pawn { moved: false }) {
                             piece.piece_type = PieceType::Pawn { moved: true };
                         }
@@ -184,6 +185,11 @@ impl Board {
                                 white_king_moved = true;
                             } else {
                                 black_king_moved = true;
+                            }
+                        }
+                        if piece.piece_type == (PieceType::Pawn { moved: true }) {
+                            if piece.coordinates.y == 1 || piece.coordinates.y == 8 {
+                                piece.piece_type = PieceType::Queen;
                             }
                         }
                         field.piece = Some(piece);

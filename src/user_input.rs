@@ -18,11 +18,13 @@ fn handle_piece_move(
     selected_entity: Entity,
     clicked_coords: Coordinates,
     state: &mut ResMut<State<GlobalState>>,
+    game_textures: &Res<GameTextures>,
 ) {
     let query_item = piece_query.get_mut(selected_entity);
-    let (_, transform, mut piece) = query_item.unwrap();
+    let (mut image, transform, mut piece) = query_item.unwrap();
 
     let possible_moves = get_possible_moves(&piece, &game_state.board, true);
+
     if possible_moves.contains(&clicked_coords) {
         let old_field_id = game_state.board.get_field_entity(piece.coordinates);
         let old_field_query_item = field_query.get_mut(old_field_id.unwrap());
@@ -39,6 +41,28 @@ fn handle_piece_move(
         new_field.piece = Some(piece.clone());
         if (piece.piece_type == PieceType::Pawn { moved: false }) {
             piece.piece_type = PieceType::Pawn { moved: true };
+        }
+        // if piece is a pawn and it is on the last row, promote it
+        if (piece.piece_type == PieceType::Pawn { moved: true }) {
+            if piece.piece_color == PieceColor::White && clicked_coords.y == 8 {
+                println!("Promoting white pawn!");
+                piece.piece_type = PieceType::Queen;
+                *image = game_textures
+                    .white_images_map
+                    .get(&PieceType::Queen)
+                    .unwrap()
+                    .0
+                    .clone()
+            } else if piece.piece_color == PieceColor::Black && clicked_coords.y == 1 {
+                println!("Promoting black pawn!");
+                piece.piece_type = PieceType::Queen;
+                *image = game_textures
+                    .black_images_map
+                    .get(&PieceType::Queen)
+                    .unwrap()
+                    .0
+                    .clone()
+            }
         }
 
         move_piece_sprite(transform, piece.coordinates, clicked_coords);
@@ -117,18 +141,22 @@ fn handle_field_click(
 ) {
     if let Some(selected_id) = game_state.selected_entity {
         clear_board(game_state, game_textures, piece_query, field_query);
+
         let clicked_field = game_state.board.get_field(clicked_coords).unwrap();
+
+        // if clicked field has piece and it's the same color as the player who's turn it is
         if clicked_field.piece.is_some()
             && (clicked_field.piece.clone().unwrap().piece_color == PieceColor::White)
                 == game_state.white
         {
-            if clicked_field.piece.clone().unwrap().entity.unwrap() == selected_id {
+            let clicked_piece = clicked_field.piece.as_ref().unwrap();
+            let clicked_id = clicked_piece.entity.unwrap();
+
+            if clicked_id == selected_id {
                 clear_board(game_state, game_textures, piece_query, field_query);
                 return;
             }
-            // println!("Clicked on own piece");
-            let piece = clicked_field.piece.clone().unwrap();
-            let clicked_id = piece.entity.unwrap();
+
             select_piece(game_state, game_textures, piece_query, clicked_id);
         } else {
             handle_piece_move(
@@ -139,12 +167,14 @@ fn handle_field_click(
                 selected_id,
                 clicked_coords,
                 state,
+                game_textures,
             );
         }
     } else {
         clear_board(game_state, game_textures, piece_query, field_query);
         let clicked_field = game_state.board.get_field(clicked_coords).unwrap();
-        if let Some(piece) = clicked_field.piece.clone() {
+
+        if let Some(piece) = clicked_field.piece.as_ref() {
             if (piece.piece_color == PieceColor::White) == game_state.white {
                 let clicked_id = piece.entity.unwrap();
                 select_piece(game_state, game_textures, piece_query, clicked_id);
@@ -192,7 +222,6 @@ fn handle_user_input(
 
             if let Some(pos) = window.cursor_position() {
                 let clicked_coords = mouse_pos_to_coordinates(pos.x, pos.y, width, height);
-                //println!("clicked_coords = {}", clicked_coords);
 
                 if game_state.board.get_field(clicked_coords).is_some() {
                     handle_field_click(

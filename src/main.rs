@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use chess_masters::board::*;
 use chess_masters::game_over::*;
 use chess_masters::ui::{GameTextures, UserInterfacePlugin};
@@ -31,6 +32,7 @@ fn main() {
         }))
         .add_state(GlobalState::InGame) // later change to MainMenu
         .add_system_set(SystemSet::on_enter(GlobalState::GameOver).with_system(spawn_game_over))
+        .add_plugin(WorldInspectorPlugin)
         .add_plugin(BoardPlugin)
         .add_plugin(UserInputPlugin)
         .add_plugin(UserInterfacePlugin)
