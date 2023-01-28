@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy::window::WindowMode::BorderlessFullscreen;
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use chess_masters::board::*;
 use chess_masters::game_over::*;
 use chess_masters::main_menu::MainMenuPlugin;
@@ -34,6 +35,7 @@ fn main() {
         }))
         .add_state(GlobalState::MainMenu)
         .add_plugin(GameOverPlugin)
+        //.add_plugin(WorldInspectorPlugin)
         .add_plugin(BoardPlugin)
         .add_plugin(UserInputPlugin)
         .add_plugin(MainMenuPlugin)
