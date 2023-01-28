@@ -281,7 +281,10 @@ pub struct UserInputPlugin;
 
 impl Plugin for UserInputPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(handle_user_input);
-        app.add_system(highlight_moves_on_click.after(handle_user_input));
+        app.add_system_set(
+            SystemSet::on_update(GlobalState::InGame)
+                .with_system(handle_user_input)
+                .with_system(highlight_moves_on_click.after(handle_user_input)),
+        );
     }
 }

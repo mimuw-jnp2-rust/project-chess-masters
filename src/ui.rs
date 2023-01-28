@@ -120,7 +120,7 @@ impl GameTextures {
 }
 
 #[derive(Default, Component, Debug)]
-struct FpsText;
+pub struct FpsText;
 
 #[derive(Default, Component, Debug)]
 pub struct ColorText;
@@ -216,9 +216,14 @@ pub struct UserInterfacePlugin;
 impl Plugin for UserInterfacePlugin {
     fn build(&self, app: &mut App) {
         app.add_plugin(FrameTimeDiagnosticsPlugin::default())
-            .add_startup_system(init_next_move_text)
-            .add_system(text_color_system)
-            .add_system(text_update_system)
-            .add_system(change_text_system);
+            .add_system_set(
+                SystemSet::on_enter(GlobalState::InGame).with_system(init_next_move_text),
+            )
+            .add_system_set(
+                SystemSet::on_update(GlobalState::InGame)
+                    .with_system(text_color_system)
+                    .with_system(text_update_system)
+                    .with_system(change_text_system),
+            );
     }
 }

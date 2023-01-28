@@ -1,6 +1,8 @@
 use bevy::prelude::*;
+use bevy::window::WindowMode::BorderlessFullscreen;
 use chess_masters::board::*;
 use chess_masters::game_over::*;
+use chess_masters::main_menu::MainMenuPlugin;
 use chess_masters::ui::{GameTextures, UserInterfacePlugin};
 use chess_masters::user_input::UserInputPlugin;
 use chess_masters::*;
@@ -23,16 +25,18 @@ fn main() {
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             window: WindowDescriptor {
                 title: "Chess!".to_string(),
-                width: WINDOW_WIDTH,
+                //mode: BorderlessFullscreen,
                 height: WINDOW_HEIGHT,
+                width: WINDOW_WIDTH,
                 ..default()
             },
             ..default()
         }))
-        .add_state(GlobalState::InGame) // later change to MainMenu
-        .add_system_set(SystemSet::on_enter(GlobalState::GameOver).with_system(spawn_game_over))
+        .add_state(GlobalState::MainMenu)
+        .add_plugin(GameOverPlugin)
         .add_plugin(BoardPlugin)
         .add_plugin(UserInputPlugin)
+        .add_plugin(MainMenuPlugin)
         .add_plugin(UserInterfacePlugin)
         .insert_resource(ClearColor(SADDLE_BROWN))
         //.insert_resource(WinitSettings::desktop_app())
