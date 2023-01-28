@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy::window::WindowMode::BorderlessFullscreen;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
+use chess_masters::audio::ChessAudioPlugin;
 use chess_masters::board::*;
 use chess_masters::game_over::*;
 use chess_masters::main_menu::MainMenuPlugin;
@@ -39,6 +40,7 @@ fn main() {
         .add_plugin(BoardPlugin)
         .add_plugin(UserInputPlugin)
         .add_plugin(MainMenuPlugin)
+        .add_plugin(ChessAudioPlugin)
         .add_plugin(UserInterfacePlugin)
         .insert_resource(ClearColor(SADDLE_BROWN))
         //.insert_resource(WinitSettings::desktop_app())
