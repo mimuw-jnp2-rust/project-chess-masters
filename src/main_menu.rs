@@ -14,19 +14,34 @@ struct MenuBackground;
 
 fn start_button_clicked(
     mut commands: Commands,
-    interactions: Query<&Interaction, (With<StartButton>, Changed<Interaction>)>,
+    mut interactions: Query<
+        (&Interaction, &mut BackgroundColor),
+        (With<Button>, Changed<Interaction>),
+    >,
     menu_root: Query<Entity, With<MainMenuRoot>>,
     menu_background: Query<Entity, With<MenuBackground>>,
     mut global_state: ResMut<State<GlobalState>>,
+    //mut text_query: Query<&mut Text>,
 ) {
-    for interaction in &interactions {
-        if matches!(interaction, Interaction::Clicked) {
-            let root_entity = menu_root.single();
-            let background_entity = menu_background.single();
+    for (interaction, mut color) in &mut interactions {
+        //let text = text_query.get(children[0]).unwrap();
+        match *interaction {
+            Interaction::Clicked => {
+                *color = bevy::prelude::BackgroundColor(Color::BLACK);
+                let root_entity = menu_root.single();
+                let background_entity = menu_background.single();
 
-            commands.entity(root_entity).despawn_recursive();
-            commands.entity(background_entity).despawn();
-            global_state.set(GlobalState::InGame).unwrap();
+                commands.entity(root_entity).despawn_recursive();
+                commands.entity(background_entity).despawn();
+
+                global_state.set(GlobalState::InGame).unwrap();
+            }
+            Interaction::Hovered => {
+                *color = LIGHT_GRAY.into();
+            }
+            Interaction::None => {
+                *color = DARK_GRAY.into();
+            }
         }
     }
 }
@@ -65,15 +80,16 @@ fn spawn_button(commands: &mut Commands, asset_server: &AssetServer, text: &str)
         .id()
 }
 
-fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>, windows: Res<Windows>) {
+fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
+    // , windows: Res<Windows>
     //let window = windows.get_primary().unwrap();
     //let (height, width) = (window.height(), window.width());
     //print!("Window height= {} width = {}", height, width);
     //println!("Spawning main menu");
 
-    let start_game_button = spawn_button(&mut commands, &asset_server, "Play with your friend");
+    let start_game_button = spawn_button(&mut commands, &asset_server, FRIEND_TEXT);
     commands.entity(start_game_button).insert(StartButton);
-    let bot_button = spawn_button(&mut commands, &asset_server, "Play with bot");
+    let bot_button = spawn_button(&mut commands, &asset_server, BOT_TEXT);
     commands.entity(start_game_button).insert(BotButton);
 
     let background_image: Handle<Image> = asset_server.load("background.png");
@@ -97,7 +113,6 @@ fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>, windo
                 flex_direction: FlexDirection::Column,
                 ..default()
             },
-            //background_color: WHITE_FIELD.into(),
             ..default()
         })
         .insert(MainMenuRoot)

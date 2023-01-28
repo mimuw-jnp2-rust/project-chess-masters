@@ -5,6 +5,7 @@ use coordinates::Coordinates;
 use std::collections::HashMap;
 use ui::GameTextures;
 
+pub mod audio;
 pub mod board;
 pub mod chess_pieces;
 pub mod coordinates;
@@ -33,6 +34,9 @@ pub const RED: Color = Color::rgb(0.9, 0.1, 0.1);
 pub const SADDLE_BROWN: Color = Color::rgb(59.0 / 255.0, 26.0 / 255.0, 14.0 / 255.0);
 pub const YELLOW: Color = Color::rgb(218.0 / 255.0, 160.0 / 255.0, 0.0 / 255.0);
 pub const GREEN: Color = Color::rgb(47.0 / 255.0, 168.0 / 255.0, 43.0 / 255.0);
+
+pub const FRIEND_TEXT: &str = "Play with your friend";
+pub const BOT_TEXT: &str = "Play with bot";
 
 pub const WHITE_PAWN_SPRITE: &str = "128px/w_pawn_png_shadow_128px.png";
 pub const BORDERED_WHITE_PAWN_SPRITE: &str = "128px/w_pawn_bordered.png";
