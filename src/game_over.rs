@@ -12,7 +12,10 @@ struct GameOverText;
 
 fn play_again_button_clicked(
     mut commands: Commands,
-    interactions: Query<&Interaction, (With<PlayAgainButton>, Changed<Interaction>)>,
+    mut interactions: Query<
+        (&Interaction, &mut BackgroundColor),
+        (With<PlayAgainButton>, Changed<Interaction>),
+    >,
     mut global_state: ResMut<State<GlobalState>>,
     piece_query: Query<Entity, With<Piece>>,
     field_query: Query<Entity, With<Field>>,
@@ -21,30 +24,37 @@ fn play_again_button_clicked(
     game_over_text_qury: Query<Entity, With<GameOverText>>,
     play_again_button: Query<Entity, With<PlayAgainButton>>,
 ) {
-    for interaction in &interactions {
-        if matches!(interaction, Interaction::Clicked) {
-            // despawnowansko
-            let color_text_e = color_text_qury.single();
-            commands.entity(color_text_e).despawn_recursive();
+    for (interaction, mut color) in &mut interactions {
+        match *interaction {
+            Interaction::Clicked => {
+                let color_text_e = color_text_qury.single();
+                commands.entity(color_text_e).despawn_recursive();
 
-            let fps_text_e = fps_text_qury.single();
-            commands.entity(fps_text_e).despawn_recursive();
+                let fps_text_e = fps_text_qury.single();
+                commands.entity(fps_text_e).despawn_recursive();
 
-            let game_over_text_e = game_over_text_qury.single();
-            commands.entity(game_over_text_e).despawn_recursive();
+                let game_over_text_e = game_over_text_qury.single();
+                commands.entity(game_over_text_e).despawn_recursive();
 
-            let play_again_button_e = play_again_button.single();
-            commands.entity(play_again_button_e).despawn_recursive();
+                let play_again_button_e = play_again_button.single();
+                commands.entity(play_again_button_e).despawn_recursive();
 
-            for entity in field_query.iter() {
-                commands.entity(entity).despawn_recursive();
+                for entity in field_query.iter() {
+                    commands.entity(entity).despawn_recursive();
+                }
+
+                for entity in piece_query.iter() {
+                    commands.entity(entity).despawn_recursive();
+                }
+
+                global_state.set(GlobalState::MainMenu).unwrap();
             }
-
-            for entity in piece_query.iter() {
-                commands.entity(entity).despawn_recursive();
+            Interaction::Hovered => {
+                *color = LIGHT_GRAY.into();
             }
-
-            global_state.set(GlobalState::MainMenu).unwrap();
+            Interaction::None => {
+                *color = DARK_GRAY.into();
+            }
         }
     }
 }

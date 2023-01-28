@@ -1,4 +1,5 @@
 use crate::*;
+use bevy_kira_audio::prelude::*;
 
 #[derive(Component)]
 pub struct MainMenuRoot;
@@ -21,6 +22,7 @@ fn start_button_clicked(
     menu_root: Query<Entity, With<MainMenuRoot>>,
     menu_background: Query<Entity, With<MenuBackground>>,
     mut global_state: ResMut<State<GlobalState>>,
+    audio: Res<bevy_kira_audio::prelude::Audio>,
     //mut text_query: Query<&mut Text>,
 ) {
     for (interaction, mut color) in &mut interactions {
@@ -35,6 +37,7 @@ fn start_button_clicked(
                 commands.entity(background_entity).despawn();
 
                 global_state.set(GlobalState::InGame).unwrap();
+                audio.pause().fade_out(AudioTween::default());
             }
             Interaction::Hovered => {
                 *color = LIGHT_GRAY.into();

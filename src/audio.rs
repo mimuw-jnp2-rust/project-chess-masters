@@ -1,28 +1,22 @@
 use crate::*;
-use bevy_kira_audio::{AudioChannel, AudioPlugin};
-
+use bevy_kira_audio::prelude::*;
 pub struct ChessAudioPlugin;
-
-pub struct AudioState {
-    background_handle: Handle<AudioSource>,
-}
 
 impl Plugin for ChessAudioPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugin(AudioPlugin)
-            //.add_startup_system_to_stage(StartupStage::PreStartup, load_audio)
+            .add_startup_system(start_bgm_music)
             .add_system_set(
-                SystemSet::on_enter(GlobalState::MainMenu).with_system(start_bgm_music),
+                SystemSet::on_enter(GlobalState::MainMenu).with_system(resume_bgm_music),
             );
     }
 }
 
-fn start_bgm_music(audio: Res<Audio>, assets: Res<AssetServer>) {
+fn start_bgm_music(audio: Res<bevy_kira_audio::prelude::Audio>, assets: Res<AssetServer>) {
     println!("playing song lala");
-    audio.play(assets.load("background_music.wav"));
+    audio.play(assets.load("background_music.wav")).looped();
 }
 
-fn load_audio(mut commands: Commands, audio: Res<Audio>, assets: Res<AssetServer>) {
-    let background_handle: Handle<AudioSource> = assets.load("background_music.wav");
-    let volume = 0.5;
+fn resume_bgm_music(audio: Res<bevy_kira_audio::prelude::Audio>) {
+    audio.resume();
 }
