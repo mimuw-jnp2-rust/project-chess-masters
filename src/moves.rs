@@ -190,6 +190,7 @@ fn get_king_moves(piece: &Piece, board: &Board, check_castling: bool) -> Vec<Coo
             check_for_castlings(board, piece.piece_color, &mut result);
         }
     }
+
     return result;
 }
 
@@ -251,6 +252,7 @@ pub fn get_possible_moves(piece: &Piece, board: &Board, filter_check: bool) -> V
         PieceType::Pawn { .. } => result = get_pawn_moves(piece, board),
     }
     if filter_check {
+        //println!("Result before filter: {:?}", result);
         result
             .into_iter()
             .filter(|c| !board.is_check_after_move(&piece.coordinates, c, piece.piece_color))

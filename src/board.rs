@@ -18,6 +18,15 @@ fn starting_piece_from_coordinates(coordinates: Coordinates) -> Option<Piece> {
         return None;
     };
 
+    if coordinates.x != 1
+        && coordinates.x != 5
+        && coordinates.x != 8
+        && coordinates.y != 2
+        && coordinates.y != 7
+    {
+        return None;
+    }
+
     let piece_type = if coordinates.y == 2 || coordinates.y == 7 {
         PieceType::Pawn { moved: false }
     } else if coordinates.x == 1 || coordinates.x == 8 {
@@ -139,7 +148,8 @@ impl Board {
         my_color: PieceColor,
     ) -> bool {
         let mut dummy_board: Board = self.clone();
-        if !dummy_board.move_piece(from.clone(), to.clone()) {
+        //println!("from: {:?}, to: {:?}", from, to);
+        if !dummy_board.move_piece(*from, *to) {
             panic!("Something went wrong! Can't make a dummy move");
         }
 
@@ -171,14 +181,14 @@ impl Board {
             return self.move_piece(from, Coordinates { x: 3, y: 1 })
                 && self.move_piece(to, Coordinates { x: 4, y: 1 });
         } else if to == (Coordinates { x: 1, y: 8 }) {
-            return self.move_piece(from, Coordinates { x: 7, y: 1 })
-                && self.move_piece(to, Coordinates { x: 6, y: 1 });
+            return self.move_piece(from, Coordinates { x: 7, y: 8 })
+                && self.move_piece(to, Coordinates { x: 6, y: 8 });
         } else if to == (Coordinates { x: 8, y: 8 }) {
             return self.move_piece(from, Coordinates { x: 3, y: 8 })
                 && self.move_piece(to, Coordinates { x: 4, y: 8 });
         } else if to == (Coordinates { x: 8, y: 1 }) {
-            return self.move_piece(from, Coordinates { x: 7, y: 8 })
-                && self.move_piece(to, Coordinates { x: 6, y: 8 });
+            return self.move_piece(from, Coordinates { x: 7, y: 1 })
+                && self.move_piece(to, Coordinates { x: 6, y: 1 });
         } else {
             return false;
         }
@@ -186,12 +196,14 @@ impl Board {
 
     pub fn move_piece(&mut self, from: Coordinates, to: Coordinates) -> bool {
         if let Some(piece) = self.get_piece(to) {
-            let my_color = self
+            let piece_from = self
                 .get_piece(from)
-                .expect("This should retrun Some(piece) for sure")
-                .piece_color;
+                .expect("This should retrun Some(piece) for sure");
 
-            if my_color == piece.piece_color {
+            if piece_from.piece_color == piece.piece_color
+                && piece.piece_type == (PieceType::Rook { moved: false })
+                && piece_from.piece_type == (PieceType::King { moved: false })
+            {
                 return self.castling(from, to);
             }
         }
@@ -214,6 +226,7 @@ impl Board {
                         if piece.piece_type == (PieceType::Rook { moved: false }) {
                             piece.piece_type = PieceType::Rook { moved: true };
                         }
+
                         if piece.piece_type == (PieceType::King { moved: false })
                             || piece.piece_type == (PieceType::King { moved: true })
                         {
@@ -350,7 +363,14 @@ pub fn board_spawn_system(
                 field.piece = Some(piece);
             }
 
-            commands.entity(field_id).insert(field.clone());
+            commands.entity(field_id).insert({
+                Field {
+                    entity: field_id,
+                    coordinates,
+                    color: field_color,
+                    piece: None,
+                }
+            });
             row.push(field);
             x += FIELD_SIZE;
         }
