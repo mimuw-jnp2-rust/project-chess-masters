@@ -39,10 +39,15 @@ fn handle_start_button(
     menu_background: Query<Entity, With<MenuBackground>>,
     mut global_state: ResMut<State<GlobalState>>,
     audio: Res<bevy_kira_audio::prelude::Audio>,
+    mut game_state: ResMut<GameState>,
 ) {
     for (interaction, mut color) in &mut interactions {
         match *interaction {
             Interaction::Clicked => {
+                game_state.vs_bot = false;
+                game_state.white = true;
+                game_state.bot_turn = false;
+                game_state.winner = None;
                 despawn_menu(&mut commands, &menu_root, &menu_background);
                 global_state.set(GlobalState::InGame).unwrap();
                 audio.pause().fade_out(AudioTween::default());
@@ -67,10 +72,15 @@ fn handle_bot_button(
     menu_background: Query<Entity, With<MenuBackground>>,
     mut global_state: ResMut<State<GlobalState>>,
     audio: Res<bevy_kira_audio::prelude::Audio>,
+    mut game_state: ResMut<GameState>,
 ) {
     for (interaction, mut color) in &mut interactions {
         match *interaction {
             Interaction::Clicked => {
+                game_state.vs_bot = true;
+                game_state.white = true;
+                game_state.bot_turn = false;
+                game_state.winner = None;
                 despawn_menu(&mut commands, &menu_root, &menu_background);
                 global_state.set(GlobalState::InGame).unwrap();
                 audio.pause().fade_out(AudioTween::default());

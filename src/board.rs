@@ -292,7 +292,6 @@ pub fn board_spawn_system(
     mut commands: Commands,
     game_textures: Res<GameTextures>,
     mut game_state: ResMut<GameState>,
-    mut global_state: ResMut<State<GlobalState>>,
 ) {
     let start_x = (-1.0) * ((FIELD_SIZE * BOARD_SIZE as f32) / 2.0 - (FIELD_SIZE / 2.0));
     let mut x = start_x;
@@ -352,6 +351,8 @@ pub fn board_spawn_system(
         y += FIELD_SIZE;
     }
     game_state.board.fields = fields;
+    game_state.board.white_king_pos = Coordinates { x: 5, y: 1 };
+    game_state.board.black_king_pos = Coordinates { x: 5, y: 8 };
 }
 
 pub struct BoardPlugin;

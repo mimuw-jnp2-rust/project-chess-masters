@@ -37,9 +37,9 @@ fn play_again_button_clicked(
     mut global_state: ResMut<State<GlobalState>>,
     piece_query: Query<Entity, With<Piece>>,
     field_query: Query<Entity, With<Field>>,
-    color_text_qury: Query<Entity, With<ColorText>>,
-    fps_text_qury: Query<Entity, With<FpsText>>,
-    game_over_text_qury: Query<Entity, With<GameOverText>>,
+    color_text_query: Query<Entity, With<ColorText>>,
+    fps_text_query: Query<Entity, With<FpsText>>,
+    game_over_text_query: Query<Entity, With<GameOverText>>,
     play_again_button: Query<Entity, With<PlayAgainButton>>,
 ) {
     for (interaction, mut color) in &mut interactions {
@@ -49,11 +49,11 @@ fn play_again_button_clicked(
                     &mut commands,
                     &piece_query,
                     &field_query,
-                    &color_text_qury,
-                    &fps_text_qury,
+                    &color_text_query,
+                    &fps_text_query,
                 );
 
-                let game_over_text_e = game_over_text_qury.single();
+                let game_over_text_e = game_over_text_query.single();
                 commands.entity(game_over_text_e).despawn_recursive();
 
                 let play_again_button_e = play_again_button.single();

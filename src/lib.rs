@@ -95,13 +95,6 @@ pub enum WhoseTurn {
     Player,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-
-pub enum WhoseTurn {
-    Bot,
-    Player,
-}
-
 pub fn get_image(piece: &Piece, game_textures: &Res<GameTextures>) -> Handle<Image> {
     let maybe_image = if piece.piece_color == PieceColor::White {
         game_textures.white_images_map.get(&piece.piece_type)

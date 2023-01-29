@@ -32,8 +32,8 @@ fn main() {
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             window: WindowDescriptor {
                 title: "Chess!".to_string(),
-                width: 800.0,
-                height: 800.0,
+                width: 1920.0,
+                height: 1080.0,
                 //mode: BorderlessFullscreen,
                 ..default()
             },
@@ -42,7 +42,6 @@ fn main() {
         .add_state(GlobalState::MainMenu)
         .add_state(WhoseTurn::Player)
         .add_plugin(GameOverPlugin)
-        //.add_plugin(WorldInspectorPlugin)
         .add_plugin(BoardPlugin)
         .add_plugin(UserInputPlugin)
         .add_plugin(MainMenuPlugin)
@@ -51,7 +50,6 @@ fn main() {
         .add_plugin(UserInterfacePlugin)
         .add_plugin(BotPlugin)
         .insert_resource(ClearColor(SADDLE_BROWN))
-        //.insert_resource(WinitSettings::desktop_app())
         .add_startup_system(setup)
         .run();
 }

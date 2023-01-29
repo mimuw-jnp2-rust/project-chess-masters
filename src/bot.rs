@@ -14,7 +14,7 @@ use crate::*;
 struct BotMoveTask(Task<String>);
 
 fn spawn_task(mut commands: Commands, state: ResMut<GameState>) {
-    if state.bot_turn && state.winner == None {
+    if state.bot_turn {
         let thread_pool = AsyncComputeTaskPool::get();
         let board_clone = state.board.clone();
         let task = thread_pool.spawn(async move {
@@ -68,7 +68,12 @@ fn move_piece(
     let old_field_id = game_state.board.get_field_entity(from);
     let old_field_query_item = field_query.get_mut(old_field_id.unwrap());
     let old_field = old_field_query_item.unwrap().1;
-    let piece_entity = old_field.piece.clone().unwrap().entity.unwrap();
+    let piece_entity = old_field
+        .piece
+        .clone()
+        .unwrap()
+        .entity
+        .expect("No piece entity");
     // print board
     println!("{}", game_state.board.to_fen());
 
@@ -125,18 +130,20 @@ fn get_best_move_from_stockfish(position: &str) -> String {
         .spawn()
         .expect("failed to execute stockfish");
 
-    let input = format!("position fen {}\ngo movetime 500\n", position);
-    //println!("input: \n{}", input);
-
+    let difficulty_input = "setoption name Skill Level value 0\n";
     let stockfish_stdin = process.stdin.as_mut().expect("failed to open stdin");
+    stockfish_stdin
+        .write_all(difficulty_input.as_bytes())
+        .expect("failed to write to stdin");
+
+    let input = format!("position fen {}\ngo movetime 500\n", position);
 
     stockfish_stdin
         .write_all(input.as_bytes())
         .expect("failed to write to stdin");
 
     std::thread::sleep(std::time::Duration::from_secs(1));
-    //process.kill().expect("failed to kill process");
-    // send quit to stdin
+
     stockfish_stdin
         .write_all(b"quit\n")
         .expect("failed to write to stdin");
@@ -160,41 +167,11 @@ fn get_best_move_from_stockfish(position: &str) -> String {
     best_move.to_string()
 }
 
-/*fn get_best_move_from_stockfish(position: &str) -> String {
-    let mut process = Command::new("stockfish")
-        .stdin(std::process::Stdio::piped())
-        .stdout(std::process::Stdio::piped())
-        .spawn()
-        .expect("failed to execute stockfish");
-
-    let input = format!("position fen {}\ngo movetime 1000\n", position);
-
-    let stdin = process.stdin.as_mut().expect("failed to open stdin");
-    stdin
-        .write_all(input.as_bytes())
-        .expect("failed to write to stdin");
-
-    let output = process.wait_with_output().expect("failed to read stdout");
-    let output = String::from_utf8(output.stdout).expect("failed to parse stdout");
-
-    let mut best_move = "";
-    for line in output.lines() {
-        if line.starts_with("bestmove") {
-            best_move = line.split_whitespace().nth(1).unwrap();
-            break;
-        }
+fn clear_tasks(mut commands: Commands, tasks: Query<Entity, With<BotMoveTask>>) {
+    for entity in tasks.iter() {
+        commands.entity(entity).despawn();
     }
-    if best_move == "" {
-        for line in output.lines() {
-            println!("{}", line);
-            if line.starts_with("info depth") {
-                best_move = line.split_whitespace().nth(10).unwrap();
-                break;
-            }
-        }
-    }
-    best_move.to_string()
-}*/
+}
 
 pub struct BotPlugin;
 
@@ -202,5 +179,6 @@ impl Plugin for BotPlugin {
     fn build(&self, app: &mut App) {
         app.add_system_set(SystemSet::on_enter(WhoseTurn::Bot).with_system(spawn_task));
         app.add_system_set(SystemSet::on_update(WhoseTurn::Bot).with_system(manage_task));
+        app.add_system_set(SystemSet::on_exit(WhoseTurn::Bot).with_system(clear_tasks));
     }
 }

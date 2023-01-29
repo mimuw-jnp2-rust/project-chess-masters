@@ -92,16 +92,20 @@ pub fn handle_piece_move(
             } else {
                 println!("Draw!");
             }
+            game_state.vs_bot = false;
             state.set(GlobalState::GameOver).unwrap();
-        } else {
-            if game_state.vs_bot {
-                if game_state.bot_turn {
-                    whose_turn.set(WhoseTurn::Player).unwrap();
-                } else {
-                    whose_turn.set(WhoseTurn::Bot).unwrap();
-                }
-                game_state.bot_turn = !game_state.bot_turn;
+            if whose_turn.current() == &WhoseTurn::Bot {
+                whose_turn.set(WhoseTurn::Player).unwrap();
             }
+        }
+
+        if game_state.vs_bot {
+            if game_state.bot_turn {
+                whose_turn.set(WhoseTurn::Player).unwrap();
+            } else {
+                whose_turn.set(WhoseTurn::Bot).unwrap();
+            }
+            game_state.bot_turn = !game_state.bot_turn;
         }
     }
 }
