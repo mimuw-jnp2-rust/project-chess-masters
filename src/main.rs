@@ -1,9 +1,9 @@
 use bevy::prelude::*;
-use bevy::window::WindowMode::BorderlessFullscreen;
-use bevy_inspector_egui::quick::WorldInspectorPlugin;
+//use bevy::window::WindowMode::BorderlessFullscreen;
 use chess_masters::audio::ChessAudioPlugin;
 use chess_masters::board::*;
-use chess_masters::game_over::*;
+use chess_masters::bot::BotPlugin;
+use chess_masters::game_over::GameOverPlugin;
 use chess_masters::game_paused::GamePausedPlugin;
 use chess_masters::main_menu::MainMenuPlugin;
 use chess_masters::ui::{GameTextures, UserInterfacePlugin};
@@ -20,6 +20,9 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         board: Board::empty(),
         selected_entity: None,
         winner: None,
+        bot_turn: false,
+        vs_bot: true,
+        castling: false,
     });
 }
 
@@ -28,24 +31,24 @@ fn main() {
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             window: WindowDescriptor {
                 title: "Chess!".to_string(),
+                width: 1920.0,
+                height: 1080.0,
                 //mode: BorderlessFullscreen,
-                height: WINDOW_HEIGHT,
-                width: WINDOW_WIDTH,
                 ..default()
             },
             ..default()
         }))
         .add_state(GlobalState::MainMenu)
+        .add_state(WhoseTurn::Player)
         .add_plugin(GameOverPlugin)
-        //.add_plugin(WorldInspectorPlugin)
         .add_plugin(BoardPlugin)
         .add_plugin(UserInputPlugin)
         .add_plugin(MainMenuPlugin)
         .add_plugin(ChessAudioPlugin)
         .add_plugin(GamePausedPlugin)
         .add_plugin(UserInterfacePlugin)
+        .add_plugin(BotPlugin)
         .insert_resource(ClearColor(SADDLE_BROWN))
-        //.insert_resource(WinitSettings::desktop_app())
         .add_startup_system(setup)
         .run();
 }

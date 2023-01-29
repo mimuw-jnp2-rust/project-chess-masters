@@ -7,6 +7,7 @@ pub struct Board {
     pub fields: Vec<Vec<Field>>,
     pub white_king_pos: Coordinates,
     pub black_king_pos: Coordinates,
+    full_move_number: u32,
 }
 
 fn starting_piece_from_coordinates(coordinates: Coordinates) -> Option<Piece> {
@@ -17,15 +18,6 @@ fn starting_piece_from_coordinates(coordinates: Coordinates) -> Option<Piece> {
     } else {
         return None;
     };
-
-    if coordinates.x != 1
-        && coordinates.x != 5
-        && coordinates.x != 8
-        && coordinates.y != 2
-        && coordinates.y != 7
-    {
-        return None;
-    }
 
     let piece_type = if coordinates.y == 2 || coordinates.y == 7 {
         PieceType::Pawn { moved: false }
@@ -47,9 +39,10 @@ impl Board {
     pub fn empty() -> Board {
         let fields: Vec<Vec<Field>> = Vec::new();
         Board {
-            fields: fields,
+            fields,
             white_king_pos: Coordinates { x: 5, y: 1 },
             black_king_pos: Coordinates { x: 5, y: 8 },
+            full_move_number: 1,
         }
     }
 
@@ -63,6 +56,32 @@ impl Board {
             }
             println!();
         }
+    }
+
+    pub fn to_fen(&self) -> String {
+        let mut fen = String::new();
+        for i in (0..BOARD_SIZE).rev() {
+            let mut empty_fields = 0;
+            for j in 0..BOARD_SIZE {
+                match &self.fields[i][j].piece {
+                    Some(piece) => {
+                        if empty_fields > 0 {
+                            fen.push_str(&empty_fields.to_string());
+                            empty_fields = 0;
+                        }
+                        fen.push_str(&piece.to_fen());
+                    }
+                    None => empty_fields += 1,
+                }
+            }
+            if empty_fields > 0 {
+                fen.push_str(&empty_fields.to_string());
+            }
+            if i > 0 {
+                fen.push('/');
+            }
+        }
+        fen + " b - - 0 " + &self.full_move_number.to_string()
     }
 
     pub fn get_field(&self, coordinates: Coordinates) -> Option<&Field> {
@@ -108,7 +127,7 @@ impl Board {
                 }
             }
         }
-        return false;
+        false
     }
 
     // iterates through all fields. If there is an enemy piece, check if
@@ -124,7 +143,7 @@ impl Board {
             for field in row {
                 if let Some(some_piece) = &field.piece {
                     if some_piece.piece_color == my_color {
-                        let mut possible_moves = get_possible_moves(some_piece, &self, true);
+                        let mut possible_moves = get_possible_moves(some_piece, self, true);
                         all_moves.append(&mut possible_moves);
                     }
                 }
@@ -148,21 +167,14 @@ impl Board {
         my_color: PieceColor,
     ) -> bool {
         let mut dummy_board: Board = self.clone();
-        //println!("from: {:?}, to: {:?}", from, to);
         if !dummy_board.move_piece(*from, *to) {
             panic!("Something went wrong! Can't make a dummy move");
         }
 
-        let my_king_in_danger: bool;
         match my_color {
-            PieceColor::White => {
-                my_king_in_danger = dummy_board.king_in_danger(PieceColor::White);
-            }
-            PieceColor::Black => {
-                my_king_in_danger = dummy_board.king_in_danger(PieceColor::Black);
-            }
+            PieceColor::White => dummy_board.king_in_danger(PieceColor::White),
+            PieceColor::Black => dummy_board.king_in_danger(PieceColor::Black),
         }
-        my_king_in_danger
     }
 
     pub fn remove_piece(&mut self, coordinates: Coordinates) -> Option<Piece> {
@@ -214,6 +226,9 @@ impl Board {
         let piece = self.remove_piece(from);
         match piece {
             Some(piece) => {
+                if piece.piece_color == PieceColor::Black {
+                    self.full_move_number += 1;
+                }
                 let field = self.get_field_mut(to);
                 match field {
                     Some(field) => {
@@ -237,11 +252,12 @@ impl Board {
                                 black_king_moved = true;
                             }
                         }
-                        if piece.piece_type == (PieceType::Pawn { moved: true }) {
-                            if piece.coordinates.y == 1 || piece.coordinates.y == 8 {
-                                piece.piece_type = PieceType::Queen;
-                            }
+                        if piece.piece_type == (PieceType::Pawn { moved: true })
+                            && (piece.coordinates.y == 1 || piece.coordinates.y == 8)
+                        {
+                            piece.piece_type = PieceType::Queen;
                         }
+
                         field.piece = Some(piece);
                     }
                     None => ok = false,
@@ -298,7 +314,7 @@ fn spawn_piece(
             texture: image,
             transform: Transform {
                 translation: Vec3::new(on_window_coordinates.x, on_window_coordinates.y, 10.0),
-                scale: Vec3::new(0.3, 0.3, 1.0),
+                scale: Vec3::new(0.5, 0.5, 1.0),
                 ..default()
             },
             ..default()
@@ -379,6 +395,8 @@ pub fn board_spawn_system(
         y += FIELD_SIZE;
     }
     game_state.board.fields = fields;
+    game_state.board.white_king_pos = Coordinates { x: 5, y: 1 };
+    game_state.board.black_king_pos = Coordinates { x: 5, y: 8 };
 }
 
 pub struct BoardPlugin;

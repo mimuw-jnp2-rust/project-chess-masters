@@ -31,18 +31,20 @@ fn despawn_menu(
 
 fn handle_start_button(
     mut commands: Commands,
-    mut interactions: Query<
-        (&Interaction, &mut BackgroundColor),
-        (With<StartButton>, Changed<Interaction>),
-    >,
+    mut interactions: Query<(&Interaction, &mut BackgroundColor), With<StartButton>>,
     menu_root: Query<Entity, With<MainMenuRoot>>,
     menu_background: Query<Entity, With<MenuBackground>>,
     mut global_state: ResMut<State<GlobalState>>,
     audio: Res<bevy_kira_audio::prelude::Audio>,
+    mut game_state: ResMut<GameState>,
 ) {
     for (interaction, mut color) in &mut interactions {
         match *interaction {
             Interaction::Clicked => {
+                game_state.vs_bot = false;
+                game_state.white = true;
+                game_state.bot_turn = false;
+                game_state.winner = None;
                 despawn_menu(&mut commands, &menu_root, &menu_background);
                 global_state.set(GlobalState::InGame).unwrap();
                 audio.pause().fade_out(AudioTween::default());
@@ -59,18 +61,20 @@ fn handle_start_button(
 
 fn handle_bot_button(
     mut commands: Commands,
-    mut interactions: Query<
-        (&Interaction, &mut BackgroundColor),
-        (With<BotButton>, Changed<Interaction>),
-    >,
+    mut interactions: Query<(&Interaction, &mut BackgroundColor), With<BotButton>>,
     menu_root: Query<Entity, With<MainMenuRoot>>,
     menu_background: Query<Entity, With<MenuBackground>>,
     mut global_state: ResMut<State<GlobalState>>,
     audio: Res<bevy_kira_audio::prelude::Audio>,
+    mut game_state: ResMut<GameState>,
 ) {
     for (interaction, mut color) in &mut interactions {
         match *interaction {
             Interaction::Clicked => {
+                game_state.vs_bot = true;
+                game_state.white = true;
+                game_state.bot_turn = false;
+                game_state.winner = None;
                 despawn_menu(&mut commands, &menu_root, &menu_background);
                 global_state.set(GlobalState::InGame).unwrap();
                 audio.pause().fade_out(AudioTween::default());
@@ -87,10 +91,7 @@ fn handle_bot_button(
 
 fn handle_quit_button(
     mut commands: Commands,
-    mut interactions: Query<
-        (&Interaction, &mut BackgroundColor),
-        (With<QuitButton>, Changed<Interaction>),
-    >,
+    mut interactions: Query<(&Interaction, &mut BackgroundColor), With<QuitButton>>,
     menu_root: Query<Entity, With<MainMenuRoot>>,
     menu_background: Query<Entity, With<MenuBackground>>,
     mut exit: EventWriter<AppExit>,
@@ -163,7 +164,7 @@ fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
             texture: background_image,
             transform: Transform {
                 translation: Vec3::new(0.0, 0.0, 10.0),
-                scale: Vec3::new(0.65, 0.65, 1.0),
+                scale: Vec3::new(0.75, 0.75, 1.0),
                 ..default()
             },
             ..default()
