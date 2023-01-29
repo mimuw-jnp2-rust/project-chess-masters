@@ -70,15 +70,6 @@ pub fn handle_piece_move(
 
         move_piece_sprite(transform, piece.coordinates, clicked_coords);
 
-        if game_state.vs_bot {
-            if game_state.bot_turn {
-                whose_turn.set(WhoseTurn::Player).unwrap();
-            } else {
-                whose_turn.set(WhoseTurn::Bot).unwrap();
-            }
-            game_state.bot_turn = !game_state.bot_turn;
-        }
-
         game_state.white = !game_state.white; // end of move
         let _ = &game_state
             .board
@@ -101,6 +92,15 @@ pub fn handle_piece_move(
                 println!("Draw!");
             }
             state.set(GlobalState::GameOver).unwrap();
+        } else {
+            if game_state.vs_bot {
+                if game_state.bot_turn {
+                    whose_turn.set(WhoseTurn::Player).unwrap();
+                } else {
+                    whose_turn.set(WhoseTurn::Bot).unwrap();
+                }
+                game_state.bot_turn = !game_state.bot_turn;
+            }
         }
     }
 }

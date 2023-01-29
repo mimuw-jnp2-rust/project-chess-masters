@@ -7,6 +7,7 @@ pub struct Board {
     pub fields: Vec<Vec<Field>>,
     pub white_king_pos: Coordinates,
     pub black_king_pos: Coordinates,
+    full_move_number: u32,
 }
 
 fn starting_piece_from_coordinates(coordinates: Coordinates) -> Option<Piece> {
@@ -41,6 +42,7 @@ impl Board {
             fields: fields,
             white_king_pos: Coordinates { x: 5, y: 1 },
             black_king_pos: Coordinates { x: 5, y: 8 },
+            full_move_number: 1,
         }
     }
 
@@ -56,14 +58,13 @@ impl Board {
         }
     }
 
-    pub fn board_to_fen(&self) -> String {
+    pub fn to_fen(&self) -> String {
         let mut fen = String::new();
         for i in (0..BOARD_SIZE).rev() {
             let mut empty_fields = 0;
             for j in 0..BOARD_SIZE {
                 match &self.fields[i][j].piece {
                     Some(piece) => {
-                        println!("a piece: {}, at ({}, {})", piece, i, j);
                         if empty_fields > 0 {
                             fen.push_str(&empty_fields.to_string());
                             empty_fields = 0;
@@ -80,7 +81,7 @@ impl Board {
                 fen.push_str("/");
             }
         }
-        fen
+        fen + " b KQkq - 0 " + &self.full_move_number.to_string()
     }
 
     pub fn get_field(&self, coordinates: Coordinates) -> Option<&Field> {
@@ -198,6 +199,9 @@ impl Board {
         let piece = self.remove_piece(from);
         match piece {
             Some(piece) => {
+                if piece.piece_color == PieceColor::Black {
+                    self.full_move_number += 1;
+                }
                 let field = self.get_field_mut(to);
                 match field {
                     Some(field) => {

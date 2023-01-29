@@ -5,51 +5,36 @@ use bevy::{
     tasks::{AsyncComputeTaskPool, Task},
 };
 use futures_lite::future;
-use reqwest::Client;
+use std::{io::Write, process::Command};
 
 use crate::*;
-
-const CHESS_API_ACTION: &str = "http://www.chessdb.cn/cdb.php?action=";
-
-fn get_chess_api_querybest(board: String, query: &str) -> String {
-    CHESS_API_ACTION.to_string() + query + "&board=" + &board + "&json=1"
-}
 
 #[derive(Component)]
 struct BotMoveTask(Task<String>);
 
 fn spawn_task(mut commands: Commands, state: ResMut<GameState>) {
-    if state.bot_turn {
+    if state.bot_turn && state.winner == None {
         let thread_pool = AsyncComputeTaskPool::get();
         let board_clone = state.board.clone();
         let task = thread_pool.spawn(async move {
-            let client = Client::new();
-            let res = send_request(&client, board_clone);
+            let position = board_clone.to_fen();
+            let res = get_best_move_from_stockfish(&position);
             res
         });
         commands.spawn(BotMoveTask(task));
-        //println!("spawned task");
     }
 }
 
 fn extract_coordinates_from_move(string: String) -> (Coordinates, Coordinates) {
-    println!("string: {:?}", string);
-    let best_move = string
-        .split(',')
-        .nth(1)
-        .unwrap()
-        .split(':')
-        .nth(1)
-        .unwrap()
-        .replace("\"", "")
-        .replace("}", "")
-        .replace("\"", "");
-
-    println!("best move: {:?}", best_move);
-    let from = best_move.chars().nth(0).unwrap();
-    let from_number = best_move.chars().nth(1).unwrap();
-    let to = best_move.chars().nth(2).unwrap();
-    let to_number = best_move.chars().nth(3).unwrap();
+    println!("Move: {}", string);
+    if string.len() != 4 {
+        println!("Invalid move string: {}", string);
+        panic!("Invalid move string");
+    }
+    let from = string.chars().nth(0).unwrap();
+    let from_number = string.chars().nth(1).unwrap();
+    let to = string.chars().nth(2).unwrap();
+    let to_number = string.chars().nth(3).unwrap();
 
     let from_first = ((from as u8 - 48) as char).to_digit(10).unwrap() as i32;
     let from_second = from_number.to_digit(10).unwrap() as i32;
@@ -83,6 +68,8 @@ fn move_piece(
     let old_field_query_item = field_query.get_mut(old_field_id.unwrap());
     let old_field = old_field_query_item.unwrap().1;
     let piece_entity = old_field.piece.clone().unwrap().entity.unwrap();
+    // print board
+    println!("{}", game_state.board.to_fen());
 
     handle_piece_move(
         commands,
@@ -96,7 +83,7 @@ fn move_piece(
         whose_turn,
     );
 
-    //game_state.bot_turn = false;
+    println!("{}", game_state.board.to_fen());
 }
 
 fn manage_task(
@@ -112,7 +99,7 @@ fn manage_task(
     for (entity, mut task) in &mut tasks {
         if let Some(result) = future::block_on(future::poll_once(&mut task.0)) {
             let best_move = extract_coordinates_from_move(result);
-            println!("result: {:?}", best_move);
+            println!("best_move: {:?}", best_move);
             move_piece(
                 &mut commands,
                 &mut piece_query,
@@ -130,35 +117,40 @@ fn manage_task(
     }
 }
 
-// function that sends request to chessdb.cn
-#[tokio::main]
-async fn send_request(client: &reqwest::Client, board: Board) -> String {
-    let chess_api_query: &str = "query";
-    let mut board = board.board_to_fen(); //"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1";
-    println!("board: {}", board);
+fn get_best_move_from_stockfish(position: &str) -> String {
+    let mut process = Command::new("stockfish")
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .spawn()
+        .expect("failed to execute stockfish");
 
-    board += " b - - 0 1";
+    let input = format!("position fen {}\ngo movetime 1000", position);
 
-    let request_url = get_chess_api_querybest(board, chess_api_query);
-    println!("{}", request_url);
+    let stdin = process.stdin.as_mut().expect("failed to open stdin");
+    stdin
+        .write_all(input.as_bytes())
+        .expect("failed to write to stdin");
 
-    let response = client.get(&request_url).send().await;
-    match response {
-        Ok(res) => {
-            let res = res.text().await;
-            match res {
-                Ok(res) => res,
-                Err(e) => {
-                    println!("Error: {}", e);
-                    "".to_string()
-                }
-            }
-        }
-        Err(e) => {
-            println!("Error: {}", e);
-            "".to_string()
+    let output = process.wait_with_output().expect("failed to read stdout");
+    let output = String::from_utf8(output.stdout).expect("failed to parse stdout");
+
+    let mut best_move = "";
+    for line in output.lines() {
+        if line.starts_with("bestmove") {
+            best_move = line.split_whitespace().nth(1).unwrap();
+            break;
         }
     }
+    if best_move == "" {
+        for line in output.lines() {
+            println!("{}", line);
+            if line.starts_with("info depth") {
+                best_move = line.split_whitespace().nth(10).unwrap();
+                break;
+            }
+        }
+    }
+    best_move.to_string()
 }
 
 pub struct BotPlugin;
