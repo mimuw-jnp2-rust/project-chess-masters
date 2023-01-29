@@ -11,6 +11,7 @@ pub mod chess_pieces;
 pub mod coordinates;
 pub mod field;
 pub mod game_over;
+pub mod game_paused;
 pub mod main_menu;
 pub mod moves;
 pub mod ui;
@@ -32,12 +33,16 @@ pub const DARK_GRAY: Color = Color::rgb(80.0 / 255.0, 80.0 / 255.0, 80.0 / 255.0
 pub const LIGHT_GRAY: Color = Color::rgb(150.0 / 255.0, 150.0 / 255.0, 150.0 / 255.0);
 pub const RED: Color = Color::rgb(0.9, 0.1, 0.1);
 pub const SADDLE_BROWN: Color = Color::rgb(59.0 / 255.0, 26.0 / 255.0, 14.0 / 255.0);
-pub const YELLOW: Color = Color::rgb(218.0 / 255.0, 160.0 / 255.0, 0.0 / 255.0);
-pub const GREEN: Color = Color::rgb(47.0 / 255.0, 168.0 / 255.0, 43.0 / 255.0);
+pub const BURGUNDY_LIGHT: Color = Color::rgb(191.0 / 255.0, 98.0 / 255.0, 98.0 / 255.0);
+pub const BURGUNDY_DARK: Color = Color::rgb(118.0 / 255.0, 9.0 / 255.0, 9.0 / 255.0);
+
+pub const TRANSPARENT_GRAY: Color = Color::rgba(80.0 / 255.0, 80.0 / 255.0, 80.0 / 255.0, 0.8);
 
 pub const FRIEND_TEXT: &str = "Play with your friend";
 pub const BOT_TEXT: &str = "Play with bot";
+pub const EXIT_TO_MENU_TEXT: &str = "Exit to main menu";
 pub const QUIT_TEXT: &str = "Quit game";
+pub const KEEP_PLAYING: &str = "Back to game";
 
 pub const WHITE_PAWN_SPRITE: &str = "128px/w_pawn_png_shadow_128px.png";
 pub const BORDERED_WHITE_PAWN_SPRITE: &str = "128px/w_pawn_bordered.png";
@@ -79,6 +84,7 @@ pub enum GlobalState {
     MainMenu,
     InGame,
     GameOver,
+    Paused,
 }
 
 pub fn get_image(piece: &Piece, game_textures: &Res<GameTextures>) -> Handle<Image> {

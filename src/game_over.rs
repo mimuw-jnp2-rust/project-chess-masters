@@ -6,9 +6,27 @@ struct PlayAgainButton;
 #[derive(Component)]
 struct GameOverText;
 
-/*fn despawn_all_with<C: Component>(query: Query<Entity, With<C>>, mut commands: Commands) {
-    commands.entity(query.iter()).despawn();
-}*/
+pub fn despawn_board(
+    commands: &mut Commands,
+    piece_query: &Query<Entity, With<Piece>>,
+    field_query: &Query<Entity, With<Field>>,
+    color_text_qury: &Query<Entity, With<ColorText>>,
+    fps_text_qury: &Query<Entity, With<FpsText>>,
+) {
+    let color_text_e = color_text_qury.single();
+    commands.entity(color_text_e).despawn_recursive();
+
+    let fps_text_e = fps_text_qury.single();
+    commands.entity(fps_text_e).despawn_recursive();
+
+    for entity in field_query.iter() {
+        commands.entity(entity).despawn_recursive();
+    }
+
+    for entity in piece_query.iter() {
+        commands.entity(entity).despawn_recursive();
+    }
+}
 
 fn play_again_button_clicked(
     mut commands: Commands,
@@ -27,25 +45,19 @@ fn play_again_button_clicked(
     for (interaction, mut color) in &mut interactions {
         match *interaction {
             Interaction::Clicked => {
-                let color_text_e = color_text_qury.single();
-                commands.entity(color_text_e).despawn_recursive();
-
-                let fps_text_e = fps_text_qury.single();
-                commands.entity(fps_text_e).despawn_recursive();
+                despawn_board(
+                    &mut commands,
+                    &piece_query,
+                    &field_query,
+                    &color_text_qury,
+                    &fps_text_qury,
+                );
 
                 let game_over_text_e = game_over_text_qury.single();
                 commands.entity(game_over_text_e).despawn_recursive();
 
                 let play_again_button_e = play_again_button.single();
                 commands.entity(play_again_button_e).despawn_recursive();
-
-                for entity in field_query.iter() {
-                    commands.entity(entity).despawn_recursive();
-                }
-
-                for entity in piece_query.iter() {
-                    commands.entity(entity).despawn_recursive();
-                }
 
                 global_state.set(GlobalState::MainMenu).unwrap();
             }
@@ -89,7 +101,6 @@ pub fn spawn_text(
     }
 
     let text = format!("{}{}", "GAME OVER:", winner);
-    // Demonstrate changing translation
     commands
         .spawn((Text2dBundle {
             text: Text::from_section(text, text_style.clone()).with_alignment(text_alignment),

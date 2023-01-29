@@ -134,8 +134,6 @@ impl Board {
         to: &Coordinates,
         my_color: PieceColor,
     ) -> bool {
-        // clone fields here, don't see better option...
-
         let mut dummy_board: Board = self.clone();
         if !dummy_board.move_piece(from.clone(), to.clone()) {
             panic!("Something went wrong! Can't make a dummy move");
@@ -263,9 +261,8 @@ pub fn board_spawn_system(
     mut commands: Commands,
     game_textures: Res<GameTextures>,
     mut game_state: ResMut<GameState>,
+    mut global_state: ResMut<State<GlobalState>>,
 ) {
-    println!("Spawning board");
-
     let start_x = (-1.0) * ((FIELD_SIZE * BOARD_SIZE as f32) / 2.0 - (FIELD_SIZE / 2.0));
     let mut x = start_x;
     let mut y = (-1.0) * ((FIELD_SIZE * BOARD_SIZE as f32) / 2.0 - (FIELD_SIZE / 2.0));
@@ -330,7 +327,6 @@ pub struct BoardPlugin;
 
 impl Plugin for BoardPlugin {
     fn build(&self, app: &mut App) {
-        //app.add_startup_system_to_stage(StartupStage::PostStartup, board_spawn_system);
         app.add_system_set(
             SystemSet::on_enter(GlobalState::InGame).with_system(board_spawn_system),
         );

@@ -306,6 +306,12 @@ fn highlight_moves_on_click(
     }
 }
 
+fn pause_on_escape(keys: Res<Input<KeyCode>>, mut state: ResMut<State<GlobalState>>) {
+    if keys.just_pressed(KeyCode::Escape) {
+        state.push(GlobalState::Paused).unwrap();
+    }
+}
+
 pub struct UserInputPlugin;
 
 impl Plugin for UserInputPlugin {
@@ -313,7 +319,8 @@ impl Plugin for UserInputPlugin {
         app.add_system_set(
             SystemSet::on_update(GlobalState::InGame)
                 .with_system(handle_user_input)
-                .with_system(highlight_moves_on_click.after(handle_user_input)),
+                .with_system(highlight_moves_on_click.after(handle_user_input))
+                .with_system(pause_on_escape),
         );
     }
 }

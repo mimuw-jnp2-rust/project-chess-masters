@@ -159,7 +159,6 @@ fn get_bishop_moves(piece: &Piece, board: &Board) -> Vec<Coordinates> {
 }
 
 pub fn get_possible_moves(piece: &Piece, board: &Board, filter_check: bool) -> Vec<Coordinates> {
-    //println!("poprosze possible moves");
     let result;
     match piece.piece_type {
         PieceType::King { .. } => result = get_king_moves(piece, board),

@@ -39,10 +39,8 @@ fn handle_start_button(
     menu_background: Query<Entity, With<MenuBackground>>,
     mut global_state: ResMut<State<GlobalState>>,
     audio: Res<bevy_kira_audio::prelude::Audio>,
-    //mut text_query: Query<&mut Text>,
 ) {
     for (interaction, mut color) in &mut interactions {
-        //let text = text_query.get(children[0]).unwrap();
         match *interaction {
             Interaction::Clicked => {
                 despawn_menu(&mut commands, &menu_root, &menu_background);
@@ -69,10 +67,8 @@ fn handle_bot_button(
     menu_background: Query<Entity, With<MenuBackground>>,
     mut global_state: ResMut<State<GlobalState>>,
     audio: Res<bevy_kira_audio::prelude::Audio>,
-    //mut text_query: Query<&mut Text>,
 ) {
     for (interaction, mut color) in &mut interactions {
-        //let text = text_query.get(children[0]).unwrap();
         match *interaction {
             Interaction::Clicked => {
                 despawn_menu(&mut commands, &menu_root, &menu_background);
@@ -100,7 +96,6 @@ fn handle_quit_button(
     mut exit: EventWriter<AppExit>,
 ) {
     for (interaction, mut color) in &mut interactions {
-        //let text = text_query.get(children[0]).unwrap();
         match *interaction {
             Interaction::Clicked => {
                 despawn_menu(&mut commands, &menu_root, &menu_background);
@@ -116,7 +111,11 @@ fn handle_quit_button(
     }
 }
 
-fn spawn_button(commands: &mut Commands, asset_server: &AssetServer, text: &str) -> Entity {
+pub fn spawn_menu_button(
+    commands: &mut Commands,
+    asset_server: &AssetServer,
+    text: &str,
+) -> Entity {
     commands
         .spawn(ButtonBundle {
             style: Style {
@@ -151,11 +150,11 @@ fn spawn_button(commands: &mut Commands, asset_server: &AssetServer, text: &str)
 }
 
 fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let start_game_button = spawn_button(&mut commands, &asset_server, FRIEND_TEXT);
+    let start_game_button = spawn_menu_button(&mut commands, &asset_server, FRIEND_TEXT);
     commands.entity(start_game_button).insert(StartButton);
-    let bot_button = spawn_button(&mut commands, &asset_server, BOT_TEXT);
+    let bot_button = spawn_menu_button(&mut commands, &asset_server, BOT_TEXT);
     commands.entity(bot_button).insert(BotButton);
-    let quit_button = spawn_button(&mut commands, &asset_server, QUIT_TEXT);
+    let quit_button = spawn_menu_button(&mut commands, &asset_server, QUIT_TEXT);
     commands.entity(quit_button).insert(QuitButton);
 
     let background_image: Handle<Image> = asset_server.load("background.png");

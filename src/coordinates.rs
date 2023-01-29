@@ -1,8 +1,5 @@
-// coordinates.rs
 use crate::BOARD_SIZE;
 use crate::FIELD_SIZE;
-// use crate::WINDOW_HEIGHT;
-// use crate::WINDOW_WIDTH;
 use bevy::prelude::*;
 use std::fmt::{self, Display, Formatter};
 use std::ops::Add;
@@ -10,7 +7,7 @@ use std::ops::Add;
 #[cfg_attr(feature = "debug", derive(bevy_inspector_egui::Inspectable))]
 #[derive(Debug, Default, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Component)]
 pub struct Coordinates {
-    pub x: i32, // or u16? i is for moves simulation
+    pub x: i32,
     pub y: i32,
 }
 
@@ -33,7 +30,6 @@ impl Add for Coordinates {
 
 impl Display for Coordinates {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        //write!(f, "({}, {})", ((65 + self.x) as u8) as char, 1 + self.y)
         write!(f, "({}, {})", self.x, self.y)
     }
 }
@@ -57,7 +53,6 @@ pub fn print_coordinates(
     for (entity, coordinates) in button_query.iter() {
         if let Ok(interaction) = interaction_query.get(entity) {
             if *interaction == Interaction::Clicked {
-                //println!("Clicked button at ({}, {})", coordinates.x, coordinates.y);
                 if (coordinates.x + coordinates.y) % 2 == 0 {
                     println!(
                         "Clicked white button at ({}, {})",
