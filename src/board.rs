@@ -166,7 +166,36 @@ impl Board {
         }
     }
 
+    fn castling(&mut self, from: Coordinates, to: Coordinates) -> bool {
+        if to == (Coordinates { x: 1, y: 1 }) {
+            return self.move_piece(from, Coordinates { x: 3, y: 1 })
+                && self.move_piece(to, Coordinates { x: 4, y: 1 });
+        } else if to == (Coordinates { x: 1, y: 8 }) {
+            return self.move_piece(from, Coordinates { x: 7, y: 1 })
+                && self.move_piece(to, Coordinates { x: 6, y: 1 });
+        } else if to == (Coordinates { x: 8, y: 8 }) {
+            return self.move_piece(from, Coordinates { x: 3, y: 8 })
+                && self.move_piece(to, Coordinates { x: 4, y: 8 });
+        } else if to == (Coordinates { x: 8, y: 1 }) {
+            return self.move_piece(from, Coordinates { x: 7, y: 8 })
+                && self.move_piece(to, Coordinates { x: 6, y: 8 });
+        } else {
+            return false;
+        }
+    }
+
     pub fn move_piece(&mut self, from: Coordinates, to: Coordinates) -> bool {
+        if let Some(piece) = self.get_piece(to) {
+            let my_color = self
+                .get_piece(from)
+                .expect("This should retrun Some(piece) for sure")
+                .piece_color;
+
+            if my_color == piece.piece_color {
+                return self.castling(from, to);
+            }
+        }
+
         let mut white_king_moved = false;
         let mut black_king_moved = false;
         let mut ok = true;

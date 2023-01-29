@@ -11,6 +11,37 @@ fn move_piece_sprite(mut transform: Mut<Transform>, from: Coordinates, to: Coord
     transform.translation.y += (to.y as f32 - from.y as f32) * FIELD_SIZE;
 }
 
+fn handle_end_of_move(
+    game_state: &mut ResMut<GameState>,
+    piece: &mut Piece,
+    state: &mut ResMut<State<GlobalState>>,
+    clicked_coords: Coordinates,
+) {
+    game_state.white = !game_state.white; // end of move
+    let _ = &game_state
+        .board
+        .move_piece(piece.coordinates, clicked_coords);
+    piece.coordinates = clicked_coords;
+
+    // check for winner or draw
+    let mut color = PieceColor::White;
+    let mut maybe_winner = PieceColor::Black;
+    if !game_state.white {
+        color = PieceColor::Black;
+        maybe_winner = PieceColor::White;
+    }
+
+    if game_state.board.no_possible_moves(color) {
+        if game_state.board.king_in_danger(color) {
+            println!("Game over!"); // change state :/
+            game_state.winner = Some(maybe_winner);
+        } else {
+            println!("Draw!");
+        }
+        state.set(GlobalState::GameOver).unwrap();
+    }
+}
+
 fn handle_piece_move(
     commands: &mut Commands,
     game_state: &mut ResMut<GameState>,
@@ -36,10 +67,11 @@ fn handle_piece_move(
         let new_field_query_item = field_query.get_mut(new_field_id.unwrap());
         let mut new_field = new_field_query_item.unwrap().1;
         // despawn piece if there is one
-        if let Some(piece) = &new_field.piece {
-            commands.entity(piece.entity.unwrap()).despawn();
+        if let Some(new_piece) = &new_field.piece {
+            commands.entity(new_piece.entity.unwrap()).despawn();
         }
         new_field.piece = Some(piece.clone());
+
         if (piece.piece_type == PieceType::Pawn { moved: false }) {
             piece.piece_type = PieceType::Pawn { moved: true };
         }
@@ -68,29 +100,7 @@ fn handle_piece_move(
 
         move_piece_sprite(transform, piece.coordinates, clicked_coords);
 
-        game_state.white = !game_state.white; // end of move
-        let _ = &game_state
-            .board
-            .move_piece(piece.coordinates, clicked_coords);
-        piece.coordinates = clicked_coords;
-
-        // check for winner or draw
-        let mut color = PieceColor::White;
-        let mut maybe_winner = PieceColor::Black;
-        if !game_state.white {
-            color = PieceColor::Black;
-            maybe_winner = PieceColor::White;
-        }
-
-        if game_state.board.no_possible_moves(color) {
-            if game_state.board.king_in_danger(color) {
-                println!("Game over!"); // change state :/
-                game_state.winner = Some(maybe_winner);
-            } else {
-                println!("Draw!");
-            }
-            state.set(GlobalState::GameOver).unwrap();
-        }
+        handle_end_of_move(game_state, &mut piece, state, clicked_coords);
     }
 }
 
