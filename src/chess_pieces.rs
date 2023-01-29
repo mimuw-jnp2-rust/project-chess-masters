@@ -10,9 +10,9 @@ pub enum PieceColor {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum PieceType {
-    King,
+    King { moved: bool },
     Queen,
-    Rook,
+    Rook { moved: bool },
     Bishop,
     Knight,
     Pawn { moved: bool },
@@ -47,17 +47,17 @@ impl core::fmt::Display for Piece {
             "{}",
             match self.piece_color {
                 PieceColor::Black => match self.piece_type {
-                    PieceType::King => "♔",
+                    PieceType::King { .. } => "♔",
                     PieceType::Queen => "♕",
-                    PieceType::Rook => "♖",
+                    PieceType::Rook { .. } => "♖",
                     PieceType::Knight => "♘",
                     PieceType::Bishop => "♗",
                     PieceType::Pawn { .. } => "♙",
                 },
                 PieceColor::White => match self.piece_type {
-                    PieceType::King => "♚",
+                    PieceType::King { .. } => "♚",
                     PieceType::Queen => "♛",
-                    PieceType::Rook => "♜",
+                    PieceType::Rook { .. } => "♜",
                     PieceType::Knight => "♞",
                     PieceType::Bishop => "♝",
                     PieceType::Pawn { .. } => "♟︎",
@@ -81,9 +81,9 @@ impl Piece {
     #[allow(dead_code)]
     pub fn print_piece(&self) {
         match &self.piece_type {
-            PieceType::King => println!("King at ({})", self.coordinates),
+            PieceType::King { .. } => println!("King at ({})", self.coordinates),
             PieceType::Queen => println!("Queen at ({})", self.coordinates),
-            PieceType::Rook => println!("Rook at ({})", self.coordinates),
+            PieceType::Rook { .. } => println!("Rook at ({})", self.coordinates),
             PieceType::Bishop => println!("Bishop at ({})", self.coordinates),
             PieceType::Knight => println!("Knight at ({})", self.coordinates),
             PieceType::Pawn { .. } => println!("Pawn at ({})", self.coordinates),
@@ -93,9 +93,9 @@ impl Piece {
     #[allow(dead_code)]
     pub fn get_type(&self) -> &'static str {
         match self.piece_type {
-            PieceType::King => "King",
+            PieceType::King { .. } => "King",
             PieceType::Queen => "Queen",
-            PieceType::Rook => "Rook",
+            PieceType::Rook { .. } => "Rook",
             PieceType::Bishop => "Bishop",
             PieceType::Knight => "Knight",
             PieceType::Pawn { .. } => "Pawn",
@@ -112,9 +112,9 @@ impl Piece {
 
     pub fn get_value(&self) -> i32 {
         match self.piece_type {
-            PieceType::King => 1000,
+            PieceType::King { .. } => 1000,
             PieceType::Queen => 9,
-            PieceType::Rook => 5,
+            PieceType::Rook { .. } => 5,
             PieceType::Bishop => 3,
             PieceType::Knight => 3,
             PieceType::Pawn { .. } => 1,

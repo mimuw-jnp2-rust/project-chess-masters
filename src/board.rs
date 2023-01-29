@@ -21,7 +21,7 @@ fn starting_piece_from_coordinates(coordinates: Coordinates) -> Option<Piece> {
     let piece_type = if coordinates.y == 2 || coordinates.y == 7 {
         PieceType::Pawn { moved: false }
     } else if coordinates.x == 1 || coordinates.x == 8 {
-        PieceType::Rook
+        PieceType::Rook { moved: false }
     } else if coordinates.x == 2 || coordinates.x == 7 {
         PieceType::Knight
     } else if coordinates.x == 3 || coordinates.x == 6 {
@@ -29,7 +29,7 @@ fn starting_piece_from_coordinates(coordinates: Coordinates) -> Option<Piece> {
     } else if coordinates.x == 4 {
         PieceType::Queen
     } else {
-        PieceType::King
+        PieceType::King { moved: false }
     };
     Some(Piece::new(piece_type, piece_color, coordinates))
 }
@@ -86,16 +86,13 @@ impl Board {
         }
     }
 
-    // iterates through all fields. If there is an enemy piece, check if
-    // it could take the king
-    pub fn king_in_danger(&self, my_color: PieceColor) -> bool {
-        let king_position = &self.get_king_position(my_color);
+    pub fn field_in_danger(&self, my_color: PieceColor, coords: Coordinates) -> bool {
         for row in &self.fields {
             for field in row {
                 if let Some(some_piece) = &field.piece {
                     if some_piece.piece_color != my_color {
                         let possible_moves = get_possible_moves(some_piece, &self, false);
-                        if possible_moves.contains(king_position) {
+                        if possible_moves.contains(&coords) {
                             return true;
                         }
                     }
@@ -103,6 +100,13 @@ impl Board {
             }
         }
         return false;
+    }
+
+    // iterates through all fields. If there is an enemy piece, check if
+    // it could take the king
+    pub fn king_in_danger(&self, my_color: PieceColor) -> bool {
+        let king_position = &self.get_king_position(my_color);
+        return self.field_in_danger(my_color, *king_position);
     }
 
     pub fn no_possible_moves(&self, my_color: PieceColor) -> bool {
@@ -178,7 +182,13 @@ impl Board {
                         if piece.piece_type == (PieceType::Pawn { moved: false }) {
                             piece.piece_type = PieceType::Pawn { moved: true };
                         }
-                        if piece.piece_type == PieceType::King {
+                        if piece.piece_type == (PieceType::Rook { moved: false }) {
+                            piece.piece_type = PieceType::Rook { moved: true };
+                        }
+                        if piece.piece_type == (PieceType::King { moved: false })
+                            || piece.piece_type == (PieceType::King { moved: true })
+                        {
+                            piece.piece_type = PieceType::King { moved: true };
                             if piece.piece_color == PieceColor::White {
                                 white_king_moved = true;
                             } else {
@@ -261,7 +271,6 @@ pub fn board_spawn_system(
     mut commands: Commands,
     game_textures: Res<GameTextures>,
     mut game_state: ResMut<GameState>,
-    mut global_state: ResMut<State<GlobalState>>,
 ) {
     let start_x = (-1.0) * ((FIELD_SIZE * BOARD_SIZE as f32) / 2.0 - (FIELD_SIZE / 2.0));
     let mut x = start_x;
