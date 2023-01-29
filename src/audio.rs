@@ -13,7 +13,6 @@ impl Plugin for ChessAudioPlugin {
 }
 
 fn start_bgm_music(audio: Res<bevy_kira_audio::prelude::Audio>, assets: Res<AssetServer>) {
-    println!("playing song lala");
     audio.play(assets.load("background_music.wav")).looped();
 }
 
