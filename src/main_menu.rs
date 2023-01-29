@@ -1,4 +1,5 @@
 use crate::*;
+use bevy::app::AppExit;
 use bevy_kira_audio::prelude::*;
 
 #[derive(Component)]
@@ -11,13 +12,28 @@ struct StartButton;
 struct BotButton;
 
 #[derive(Component)]
+struct QuitButton;
+
+#[derive(Component)]
 struct MenuBackground;
 
-fn start_button_clicked(
+fn despawn_menu(
+    commands: &mut Commands,
+    menu_root: &Query<Entity, With<MainMenuRoot>>,
+    menu_background: &Query<Entity, With<MenuBackground>>,
+) {
+    let root_entity = menu_root.single();
+    let background_entity = menu_background.single();
+
+    commands.entity(root_entity).despawn_recursive();
+    commands.entity(background_entity).despawn();
+}
+
+fn handle_start_button(
     mut commands: Commands,
     mut interactions: Query<
         (&Interaction, &mut BackgroundColor),
-        (With<Button>, Changed<Interaction>),
+        (With<StartButton>, Changed<Interaction>),
     >,
     menu_root: Query<Entity, With<MainMenuRoot>>,
     menu_background: Query<Entity, With<MenuBackground>>,
@@ -29,15 +45,66 @@ fn start_button_clicked(
         //let text = text_query.get(children[0]).unwrap();
         match *interaction {
             Interaction::Clicked => {
-                *color = bevy::prelude::BackgroundColor(Color::BLACK);
-                let root_entity = menu_root.single();
-                let background_entity = menu_background.single();
-
-                commands.entity(root_entity).despawn_recursive();
-                commands.entity(background_entity).despawn();
-
+                despawn_menu(&mut commands, &menu_root, &menu_background);
                 global_state.set(GlobalState::InGame).unwrap();
                 audio.pause().fade_out(AudioTween::default());
+            }
+            Interaction::Hovered => {
+                *color = LIGHT_GRAY.into();
+            }
+            Interaction::None => {
+                *color = DARK_GRAY.into();
+            }
+        }
+    }
+}
+
+fn handle_bot_button(
+    mut commands: Commands,
+    mut interactions: Query<
+        (&Interaction, &mut BackgroundColor),
+        (With<BotButton>, Changed<Interaction>),
+    >,
+    menu_root: Query<Entity, With<MainMenuRoot>>,
+    menu_background: Query<Entity, With<MenuBackground>>,
+    mut global_state: ResMut<State<GlobalState>>,
+    audio: Res<bevy_kira_audio::prelude::Audio>,
+    //mut text_query: Query<&mut Text>,
+) {
+    for (interaction, mut color) in &mut interactions {
+        //let text = text_query.get(children[0]).unwrap();
+        match *interaction {
+            Interaction::Clicked => {
+                despawn_menu(&mut commands, &menu_root, &menu_background);
+                global_state.set(GlobalState::InGame).unwrap();
+                audio.pause().fade_out(AudioTween::default());
+            }
+            Interaction::Hovered => {
+                *color = LIGHT_GRAY.into();
+            }
+            Interaction::None => {
+                *color = DARK_GRAY.into();
+            }
+        }
+    }
+}
+
+fn handle_quit_button(
+    mut commands: Commands,
+    mut interactions: Query<
+        (&Interaction, &mut BackgroundColor),
+        (With<QuitButton>, Changed<Interaction>),
+    >,
+    menu_root: Query<Entity, With<MainMenuRoot>>,
+    menu_background: Query<Entity, With<MenuBackground>>,
+    mut exit: EventWriter<AppExit>,
+) {
+    for (interaction, mut color) in &mut interactions {
+        //let text = text_query.get(children[0]).unwrap();
+        match *interaction {
+            Interaction::Clicked => {
+                despawn_menu(&mut commands, &menu_root, &menu_background);
+                exit.send(AppExit);
             }
             Interaction::Hovered => {
                 *color = LIGHT_GRAY.into();
@@ -84,16 +151,12 @@ fn spawn_button(commands: &mut Commands, asset_server: &AssetServer, text: &str)
 }
 
 fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
-    // , windows: Res<Windows>
-    //let window = windows.get_primary().unwrap();
-    //let (height, width) = (window.height(), window.width());
-    //print!("Window height= {} width = {}", height, width);
-    //println!("Spawning main menu");
-
     let start_game_button = spawn_button(&mut commands, &asset_server, FRIEND_TEXT);
     commands.entity(start_game_button).insert(StartButton);
     let bot_button = spawn_button(&mut commands, &asset_server, BOT_TEXT);
-    commands.entity(start_game_button).insert(BotButton);
+    commands.entity(bot_button).insert(BotButton);
+    let quit_button = spawn_button(&mut commands, &asset_server, QUIT_TEXT);
+    commands.entity(quit_button).insert(QuitButton);
 
     let background_image: Handle<Image> = asset_server.load("background.png");
     commands
@@ -138,7 +201,8 @@ fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
             });
         })
         .add_child(start_game_button)
-        .add_child(bot_button);
+        .add_child(bot_button)
+        .add_child(quit_button);
 }
 
 pub struct MainMenuPlugin;
@@ -147,7 +211,10 @@ impl Plugin for MainMenuPlugin {
     fn build(&self, app: &mut App) {
         app.add_system_set(SystemSet::on_enter(GlobalState::MainMenu).with_system(spawn_main_menu))
             .add_system_set(
-                SystemSet::on_update(GlobalState::MainMenu).with_system(start_button_clicked),
+                SystemSet::on_update(GlobalState::MainMenu)
+                    .with_system(handle_start_button)
+                    .with_system(handle_quit_button)
+                    .with_system(handle_bot_button),
             );
     }
 }

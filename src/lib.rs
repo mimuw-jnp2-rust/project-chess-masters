@@ -37,6 +37,7 @@ pub const GREEN: Color = Color::rgb(47.0 / 255.0, 168.0 / 255.0, 43.0 / 255.0);
 
 pub const FRIEND_TEXT: &str = "Play with your friend";
 pub const BOT_TEXT: &str = "Play with bot";
+pub const QUIT_TEXT: &str = "Quit game";
 
 pub const WHITE_PAWN_SPRITE: &str = "128px/w_pawn_png_shadow_128px.png";
 pub const BORDERED_WHITE_PAWN_SPRITE: &str = "128px/w_pawn_bordered.png";
