@@ -7,6 +7,7 @@ use ui::GameTextures;
 
 pub mod audio;
 pub mod board;
+pub mod bot;
 pub mod chess_pieces;
 pub mod coordinates;
 pub mod field;
@@ -16,9 +17,9 @@ pub mod moves;
 pub mod ui;
 pub mod user_input;
 
-pub const WINDOW_WIDTH: f32 = 800.0;
-pub const WINDOW_HEIGHT: f32 = 800.0;
-pub const FIELD_SIZE: f32 = 70.0;
+//pub const WINDOW_WIDTH: f32 = 800.0;
+//pub const WINDOW_HEIGHT: f32 = 800.0;
+pub const FIELD_SIZE: f32 = 100.0;
 pub const BOARD_SIZE: usize = 8;
 pub const PLAY_AGAIN_BUTTON_WIDTH: f32 = 150.0;
 pub const PLAY_AGAIN_BUTTON_HEIGHT: f32 = 50.0;
@@ -71,6 +72,8 @@ pub struct GameState {
     pub white: bool,
     pub selected_entity: Option<Entity>,
     pub winner: Option<PieceColor>,
+    pub bot_turn: bool,
+    pub vs_bot: bool,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -78,6 +81,13 @@ pub enum GlobalState {
     MainMenu,
     InGame,
     GameOver,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+
+pub enum WhoseTurn {
+    Bot,
+    Player,
 }
 
 pub fn get_image(piece: &Piece, game_textures: &Res<GameTextures>) -> Handle<Image> {

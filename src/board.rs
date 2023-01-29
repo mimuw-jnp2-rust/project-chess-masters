@@ -56,6 +56,33 @@ impl Board {
         }
     }
 
+    pub fn board_to_fen(&self) -> String {
+        let mut fen = String::new();
+        for i in (0..BOARD_SIZE).rev() {
+            let mut empty_fields = 0;
+            for j in 0..BOARD_SIZE {
+                match &self.fields[i][j].piece {
+                    Some(piece) => {
+                        println!("a piece: {}, at ({}, {})", piece, i, j);
+                        if empty_fields > 0 {
+                            fen.push_str(&empty_fields.to_string());
+                            empty_fields = 0;
+                        }
+                        fen.push_str(&piece.to_fen());
+                    }
+                    None => empty_fields += 1,
+                }
+            }
+            if empty_fields > 0 {
+                fen.push_str(&empty_fields.to_string());
+            }
+            if i > 0 {
+                fen.push_str("/");
+            }
+        }
+        fen
+    }
+
     pub fn get_field(&self, coordinates: Coordinates) -> Option<&Field> {
         if coordinates.x < 1 || coordinates.x > BOARD_SIZE as i32 {
             return None;
@@ -248,7 +275,7 @@ fn spawn_piece(
             texture: image,
             transform: Transform {
                 translation: Vec3::new(on_window_coordinates.x, on_window_coordinates.y, 10.0),
-                scale: Vec3::new(0.3, 0.3, 1.0),
+                scale: Vec3::new(0.5, 0.5, 1.0),
                 ..default()
             },
             ..default()
