@@ -78,6 +78,7 @@ pub struct GameState {
     pub winner: Option<PieceColor>,
     pub bot_turn: bool,
     pub vs_bot: bool,
+    pub castling: bool,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]

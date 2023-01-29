@@ -11,12 +11,107 @@ fn move_piece_sprite(mut transform: Mut<Transform>, from: Coordinates, to: Coord
     transform.translation.y += (to.y as f32 - from.y as f32) * FIELD_SIZE;
 }
 
-#[allow(clippy::too_many_arguments)]
+fn handle_end_of_move(
+    game_state: &mut ResMut<GameState>,
+    piece: &mut Piece,
+    state: &mut ResMut<State<GlobalState>>,
+    clicked_coords: Coordinates,
+    whose_turn: &mut ResMut<State<WhoseTurn>>,
+) {
+    game_state.white = !game_state.white; // end of move
+    let _ = &game_state
+        .board
+        .move_piece(piece.coordinates, clicked_coords);
+    piece.coordinates = clicked_coords;
+
+    // check for winner or draw
+    let mut color = PieceColor::White;
+    let mut maybe_winner = PieceColor::Black;
+    if !game_state.white {
+        color = PieceColor::Black;
+        maybe_winner = PieceColor::White;
+    }
+
+    if game_state.board.no_possible_moves(color) {
+        if game_state.board.king_in_danger(color) {
+            println!("Game over!"); // change state :/
+            game_state.winner = Some(maybe_winner);
+        } else {
+            println!("Draw!");
+        }
+        state.set(GlobalState::GameOver).unwrap();
+        if whose_turn.current() == &WhoseTurn::Bot {
+            whose_turn.set(WhoseTurn::Player).unwrap();
+        }
+    }
+
+    if game_state.vs_bot {
+        if game_state.bot_turn {
+            whose_turn.set(WhoseTurn::Player).unwrap();
+        } else {
+            whose_turn.set(WhoseTurn::Bot).unwrap();
+        }
+        game_state.bot_turn = !game_state.bot_turn;
+    }
+}
+
+fn promote_pawn(
+    image: &mut Handle<Image>,
+    piece: &mut Piece,
+    game_textures: &Res<GameTextures>,
+    white: bool,
+) {
+    piece.piece_type = PieceType::Queen;
+    if white {
+        *image = game_textures
+            .white_images_map
+            .get(&PieceType::Queen)
+            .unwrap()
+            .0
+            .clone()
+    } else {
+        *image = game_textures
+            .black_images_map
+            .get(&PieceType::Queen)
+            .unwrap()
+            .0
+            .clone()
+    }
+}
+
+fn handle_pawn_promotion(
+    image: &mut Handle<Image>,
+    piece: &mut Piece,
+    game_textures: &Res<GameTextures>,
+    clicked_coords: Coordinates,
+) {
+    if (piece.piece_type == PieceType::Pawn { moved: true }) {
+        if piece.piece_color == PieceColor::White && clicked_coords.y == 8 {
+            promote_pawn(image, piece, game_textures, true);
+        } else if piece.piece_color == PieceColor::Black && clicked_coords.y == 1 {
+            promote_pawn(image, piece, game_textures, false);
+        }
+    }
+}
+
+fn check_if_piece_already_moved(piece: &mut Piece) {
+    if (piece.piece_type == PieceType::Pawn { moved: false }) {
+        piece.piece_type = PieceType::Pawn { moved: true };
+    }
+
+    if (piece.piece_type == PieceType::King { moved: false }) {
+        piece.piece_type = PieceType::King { moved: true };
+    }
+
+    if (piece.piece_type == PieceType::Rook { moved: false }) {
+        piece.piece_type = PieceType::Rook { moved: true };
+    }
+}
+
 pub fn handle_piece_move(
     commands: &mut Commands,
     game_state: &mut ResMut<GameState>,
     piece_query: &mut Query<(&mut Handle<Image>, &mut Transform, &mut Piece)>,
-    field_query: &mut Query<(&mut Sprite, &mut Field)>,
     selected_entity: Entity,
     clicked_coords: Coordinates,
     state: &mut ResMut<State<GlobalState>>,
@@ -26,88 +121,21 @@ pub fn handle_piece_move(
     let query_item = piece_query.get_mut(selected_entity);
     let (mut image, transform, mut piece) = query_item.unwrap();
 
-    let possible_moves = get_possible_moves(&piece, &game_state.board, true);
-
-    if possible_moves.contains(&clicked_coords) {
-        let old_field_id = game_state.board.get_field_entity(piece.coordinates);
-        let old_field_query_item = field_query.get_mut(old_field_id.unwrap());
-        let mut old_field = old_field_query_item.unwrap().1;
-        old_field.piece = None;
-
-        let new_field_id = game_state.board.get_field_entity(clicked_coords);
-        let new_field_query_item = field_query.get_mut(new_field_id.unwrap());
-        let mut new_field = new_field_query_item.unwrap().1;
-        // despawn piece if there is one
-        if let Some(piece) = &new_field.piece {
-            commands.entity(piece.entity.unwrap()).despawn();
+    let new_field = game_state.board.get_field(clicked_coords).unwrap();
+    if let Some(new_piece) = &new_field.piece {
+        if let Some(entity) = new_piece.entity {
+            commands.entity(entity).despawn();
         }
+    }
 
-        if (piece.piece_type == PieceType::Pawn { moved: false }) {
-            piece.piece_type = PieceType::Pawn { moved: true };
-        }
+    check_if_piece_already_moved(&mut piece);
 
-        // if piece is a pawn and it is on the last row, promote it
-        if (piece.piece_type == PieceType::Pawn { moved: true }) {
-            if piece.piece_color == PieceColor::White && clicked_coords.y == 8 {
-                println!("Promoting white pawn!");
-                piece.piece_type = PieceType::Queen;
-                *image = game_textures
-                    .white_images_map
-                    .get(&PieceType::Queen)
-                    .unwrap()
-                    .0
-                    .clone()
-            } else if piece.piece_color == PieceColor::Black && clicked_coords.y == 1 {
-                println!("Promoting black pawn!");
-                piece.piece_type = PieceType::Queen;
-                *image = game_textures
-                    .black_images_map
-                    .get(&PieceType::Queen)
-                    .unwrap()
-                    .0
-                    .clone()
-            }
-        }
-        new_field.piece = Some(piece.clone());
+    handle_pawn_promotion(&mut image, &mut piece, game_textures, clicked_coords);
 
-        move_piece_sprite(transform, piece.coordinates, clicked_coords);
+    move_piece_sprite(transform, piece.coordinates, clicked_coords);
 
-        game_state.white = !game_state.white; // end of move
-        let _ = &game_state
-            .board
-            .move_piece(piece.coordinates, clicked_coords);
-        piece.coordinates = clicked_coords;
-
-        // check for winner or draw
-        let mut color = PieceColor::White;
-        let mut maybe_winner = PieceColor::Black;
-        if !game_state.white {
-            color = PieceColor::Black;
-            maybe_winner = PieceColor::White;
-        }
-
-        if game_state.board.no_possible_moves(color) {
-            if game_state.board.king_in_danger(color) {
-                println!("Game over!"); // change state :/
-                game_state.winner = Some(maybe_winner);
-            } else {
-                println!("Draw!");
-            }
-            game_state.vs_bot = false;
-            state.set(GlobalState::GameOver).unwrap();
-            if whose_turn.current() == &WhoseTurn::Bot {
-                whose_turn.set(WhoseTurn::Player).unwrap();
-            }
-        }
-
-        if game_state.vs_bot {
-            if game_state.bot_turn {
-                whose_turn.set(WhoseTurn::Player).unwrap();
-            } else {
-                whose_turn.set(WhoseTurn::Bot).unwrap();
-            }
-            game_state.bot_turn = !game_state.bot_turn;
-        }
+    if !game_state.castling {
+        handle_end_of_move(game_state, &mut piece, state, clicked_coords, whose_turn);
     }
 }
 
@@ -148,7 +176,69 @@ fn select_piece(
     handle_piece_choice(game_state, game_textures, query, entity, true);
 }
 
-#[allow(clippy::too_many_arguments)]
+fn handle_castling(
+    commands: &mut Commands,
+    game_state: &mut ResMut<GameState>,
+    piece_query: &mut Query<(&mut Handle<Image>, &mut Transform, &mut Piece)>,
+    king_entity: Entity,
+    rook_entity: Entity,
+    state: &mut ResMut<State<GlobalState>>,
+    game_textures: &Res<GameTextures>,
+    whose_turn: &mut ResMut<State<WhoseTurn>>,
+) {
+    game_state.castling = true;
+    let rook_piece = piece_query.get_mut(rook_entity).unwrap().2;
+    let rook_coords = rook_piece.coordinates;
+
+    let king_piece = piece_query.get_mut(king_entity).unwrap().2;
+    let king_coords = king_piece.coordinates;
+
+    let new_king_coords: Coordinates;
+    let new_rook_coords: Coordinates;
+
+    if (king_coords.x - rook_coords.x).abs() == 4 {
+        new_king_coords = Coordinates {
+            x: king_coords.x - 2,
+            y: king_coords.y,
+        };
+        new_rook_coords = Coordinates {
+            x: rook_coords.x + 3,
+            y: rook_coords.y,
+        };
+    } else {
+        new_king_coords = Coordinates {
+            x: king_coords.x + 2,
+            y: king_coords.y,
+        };
+        new_rook_coords = Coordinates {
+            x: rook_coords.x - 2,
+            y: rook_coords.y,
+        };
+    }
+    handle_piece_move(
+        commands,
+        game_state,
+        piece_query,
+        king_entity,
+        new_king_coords,
+        state,
+        game_textures,
+        whose_turn,
+    );
+    game_state.castling = false;
+    handle_piece_move(
+        commands,
+        game_state,
+        piece_query,
+        rook_entity,
+        new_rook_coords,
+        state,
+        game_textures,
+        whose_turn,
+    );
+    //game_state.white = !game_state.white;
+}
+
 fn handle_field_click(
     commands: &mut Commands,
     game_state: &mut ResMut<GameState>,
@@ -171,25 +261,51 @@ fn handle_field_click(
         {
             let clicked_piece = clicked_field.piece.as_ref().unwrap();
             let clicked_id = clicked_piece.entity.unwrap();
+            let selected_piece = piece_query.get_mut(selected_id).unwrap().2;
 
             if clicked_id == selected_id {
                 clear_board(game_state, game_textures, piece_query, field_query);
                 return;
             }
 
-            select_piece(game_state, game_textures, piece_query, clicked_id);
+            // check if castling is possible
+            if clicked_piece.piece_type == (PieceType::Rook { moved: false })
+                && selected_piece.piece_type == (PieceType::King { moved: false })
+            {
+                let possible_moves = get_possible_moves(&selected_piece, &game_state.board, true);
+                if possible_moves.contains(&clicked_coords) {
+                    handle_castling(
+                        commands,
+                        game_state,
+                        piece_query,
+                        selected_id,
+                        clicked_id,
+                        state,
+                        game_textures,
+                        whose_turn,
+                    );
+                } else {
+                    select_piece(game_state, game_textures, piece_query, clicked_id);
+                }
+            } else {
+                select_piece(game_state, game_textures, piece_query, clicked_id);
+            }
         } else {
-            handle_piece_move(
-                commands,
-                game_state,
-                piece_query,
-                field_query,
-                selected_id,
-                clicked_coords,
-                state,
-                game_textures,
-                whose_turn,
-            );
+            let piece = piece_query.get_mut(selected_id).unwrap().2;
+
+            let possible_moves = get_possible_moves(&piece, &game_state.board, true);
+            if possible_moves.contains(&clicked_coords) {
+                handle_piece_move(
+                    commands,
+                    game_state,
+                    piece_query,
+                    selected_id,
+                    clicked_coords,
+                    state,
+                    game_textures,
+                    whose_turn,
+                );
+            }
         }
     } else {
         clear_board(game_state, game_textures, piece_query, field_query);
@@ -222,7 +338,6 @@ fn clear_board(
     }
 }
 
-#[allow(clippy::too_many_arguments)]
 fn handle_user_input(
     mut commands: Commands,
     windows: Res<Windows>,
@@ -236,36 +351,35 @@ fn handle_user_input(
 ) {
     let window = windows.get_primary().unwrap();
     let (height, width) = (window.height(), window.width());
-    if !game_state.bot_turn {
-        for event in button_evr.iter() {
-            if let ButtonState::Pressed = event.state {
-                if event.button != MouseButton::Left {
-                    continue;
-                }
 
-                if let Some(pos) = window.cursor_position() {
-                    let clicked_coords = mouse_pos_to_coordinates(pos.x, pos.y, width, height);
+    for event in button_evr.iter() {
+        if let ButtonState::Pressed = event.state {
+            if event.button != MouseButton::Left {
+                continue;
+            }
 
-                    if game_state.board.get_field(clicked_coords).is_some() {
-                        handle_field_click(
-                            &mut commands,
-                            &mut game_state,
-                            &game_textures,
-                            clicked_coords,
-                            &mut piece_query,
-                            &mut field_query,
-                            &mut state,
-                            &mut whose_turn,
-                        );
-                    } else {
-                        println!("Opps, clicked outside the board");
-                        clear_board(
-                            &mut game_state,
-                            &game_textures,
-                            &mut piece_query,
-                            &mut field_query,
-                        );
-                    }
+            if let Some(pos) = window.cursor_position() {
+                let clicked_coords = mouse_pos_to_coordinates(pos.x, pos.y, width, height);
+
+                if game_state.board.get_field(clicked_coords).is_some() {
+                    handle_field_click(
+                        &mut commands,
+                        &mut game_state,
+                        &game_textures,
+                        clicked_coords,
+                        &mut piece_query,
+                        &mut field_query,
+                        &mut state,
+                        &mut whose_turn,
+                    );
+                } else {
+                    // clicked outside of the board
+                    clear_board(
+                        &mut game_state,
+                        &game_textures,
+                        &mut piece_query,
+                        &mut field_query,
+                    );
                 }
             }
         }

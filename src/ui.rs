@@ -35,14 +35,28 @@ impl GameTextures {
                     ),
                 ),
                 (
-                    PieceType::Rook,
+                    PieceType::Rook { moved: false },
                     (
                         asset_server.load(WHITE_ROOK_SPRITE),
                         asset_server.load(BORDERED_WHITE_ROOK_SPRITE),
                     ),
                 ),
                 (
-                    PieceType::King,
+                    PieceType::Rook { moved: true },
+                    (
+                        asset_server.load(WHITE_ROOK_SPRITE),
+                        asset_server.load(BORDERED_WHITE_ROOK_SPRITE),
+                    ),
+                ),
+                (
+                    PieceType::King { moved: true },
+                    (
+                        asset_server.load(WHITE_KING_SPRITE),
+                        asset_server.load(BORDERED_WHITE_KING_SPRITE),
+                    ),
+                ),
+                (
+                    PieceType::King { moved: false },
                     (
                         asset_server.load(WHITE_KING_SPRITE),
                         asset_server.load(BORDERED_WHITE_KING_SPRITE),
@@ -86,14 +100,28 @@ impl GameTextures {
                     ),
                 ),
                 (
-                    PieceType::Rook,
+                    PieceType::Rook { moved: true },
                     (
                         asset_server.load(BLACK_ROOK_SPRITE),
                         asset_server.load(BORDERED_BLACK_ROOK_SPRITE),
                     ),
                 ),
                 (
-                    PieceType::King,
+                    PieceType::Rook { moved: false },
+                    (
+                        asset_server.load(BLACK_ROOK_SPRITE),
+                        asset_server.load(BORDERED_BLACK_ROOK_SPRITE),
+                    ),
+                ),
+                (
+                    PieceType::King { moved: false },
+                    (
+                        asset_server.load(BLACK_KING_SPRITE),
+                        asset_server.load(BORDERED_BLACK_KING_SPRITE),
+                    ),
+                ),
+                (
+                    PieceType::King { moved: true },
                     (
                         asset_server.load(BLACK_KING_SPRITE),
                         asset_server.load(BORDERED_BLACK_KING_SPRITE),

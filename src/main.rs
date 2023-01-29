@@ -22,6 +22,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         winner: None,
         bot_turn: false,
         vs_bot: true,
+        castling: false,
     });
 }
 

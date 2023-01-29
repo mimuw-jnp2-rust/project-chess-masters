@@ -1,5 +1,5 @@
+use crate::coordinates::*;
 use crate::user_input::handle_piece_move;
-use crate::{coordinates::*, field::Field};
 use bevy::{
     prelude::*,
     tasks::{AsyncComputeTaskPool, Task},
@@ -26,10 +26,10 @@ fn spawn_task(mut commands: Commands, state: ResMut<GameState>) {
 }
 
 fn extract_coordinates_from_move(string: String) -> (Coordinates, Coordinates) {
-    println!("Move: {}", string);
+    //println!("Move: {}", string);
     if string.len() != 4 {
         println!("Invalid move string: {}", string);
-        panic!("Invalid move string");
+        panic!("Invalid move string received from Stockfish");
     }
     let from = string.chars().next().unwrap();
     let from_number = string.chars().nth(1).unwrap();
@@ -57,7 +57,6 @@ fn extract_coordinates_from_move(string: String) -> (Coordinates, Coordinates) {
 fn move_piece(
     commands: &mut Commands,
     piece_query: &mut Query<(&mut Handle<Image>, &mut Transform, &mut Piece)>,
-    field_query: &mut Query<(&mut Sprite, &mut Field)>,
     from: Coordinates,
     to: Coordinates,
     game_state: &mut ResMut<GameState>,
@@ -65,23 +64,20 @@ fn move_piece(
     state: &mut ResMut<State<GlobalState>>,
     whose_turn: &mut ResMut<State<WhoseTurn>>,
 ) {
-    let old_field_id = game_state.board.get_field_entity(from);
-    let old_field_query_item = field_query.get_mut(old_field_id.unwrap());
-    let old_field = old_field_query_item.unwrap().1;
-    let piece_entity = old_field
-        .piece
-        .clone()
-        .unwrap()
-        .entity
-        .expect("No piece entity");
+    let old_field = game_state
+        .board
+        .get_field(from)
+        .expect("Stockfish returned invalid move");
+    let piece = old_field.piece.as_ref().unwrap();
+    let piece_entity = piece.entity.unwrap();
+
     // print board
-    println!("{}", game_state.board.to_fen());
+    //println!("{}", game_state.board.to_fen());
 
     handle_piece_move(
         commands,
         game_state,
         piece_query,
-        field_query,
         piece_entity,
         to,
         state,
@@ -89,7 +85,7 @@ fn move_piece(
         whose_turn,
     );
 
-    println!("{}", game_state.board.to_fen());
+    //println!("{}", game_state.board.to_fen());
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -97,7 +93,6 @@ fn manage_task(
     mut commands: Commands,
     mut tasks: Query<(Entity, &mut BotMoveTask)>,
     mut piece_query: Query<(&mut Handle<Image>, &mut Transform, &mut Piece)>,
-    mut field_query: Query<(&mut Sprite, &mut Field)>,
     mut game_state: ResMut<GameState>,
     game_textures: Res<GameTextures>,
     mut global_state: ResMut<State<GlobalState>>,
@@ -110,7 +105,6 @@ fn manage_task(
             move_piece(
                 &mut commands,
                 &mut piece_query,
-                &mut field_query,
                 best_move.0,
                 best_move.1,
                 &mut game_state,

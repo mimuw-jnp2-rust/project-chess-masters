@@ -22,7 +22,7 @@ fn starting_piece_from_coordinates(coordinates: Coordinates) -> Option<Piece> {
     let piece_type = if coordinates.y == 2 || coordinates.y == 7 {
         PieceType::Pawn { moved: false }
     } else if coordinates.x == 1 || coordinates.x == 8 {
-        PieceType::Rook
+        PieceType::Rook { moved: false }
     } else if coordinates.x == 2 || coordinates.x == 7 {
         PieceType::Knight
     } else if coordinates.x == 3 || coordinates.x == 6 {
@@ -30,7 +30,7 @@ fn starting_piece_from_coordinates(coordinates: Coordinates) -> Option<Piece> {
     } else if coordinates.x == 4 {
         PieceType::Queen
     } else {
-        PieceType::King
+        PieceType::King { moved: false }
     };
     Some(Piece::new(piece_type, piece_color, coordinates))
 }
@@ -114,16 +114,13 @@ impl Board {
         }
     }
 
-    // iterates through all fields. If there is an enemy piece, check if
-    // it could take the king
-    pub fn king_in_danger(&self, my_color: PieceColor) -> bool {
-        let king_position = &self.get_king_position(my_color);
+    pub fn field_in_danger(&self, my_color: PieceColor, coords: Coordinates) -> bool {
         for row in &self.fields {
             for field in row {
                 if let Some(some_piece) = &field.piece {
                     if some_piece.piece_color != my_color {
-                        let possible_moves = get_possible_moves(some_piece, self, false);
-                        if possible_moves.contains(king_position) {
+                        let possible_moves = get_possible_moves(some_piece, &self, false);
+                        if possible_moves.contains(&coords) {
                             return true;
                         }
                     }
@@ -131,6 +128,13 @@ impl Board {
             }
         }
         false
+    }
+
+    // iterates through all fields. If there is an enemy piece, check if
+    // it could take the king
+    pub fn king_in_danger(&self, my_color: PieceColor) -> bool {
+        let king_position = &self.get_king_position(my_color);
+        return self.field_in_danger(my_color, *king_position);
     }
 
     pub fn no_possible_moves(&self, my_color: PieceColor) -> bool {
@@ -184,7 +188,38 @@ impl Board {
         }
     }
 
+    fn castling(&mut self, from: Coordinates, to: Coordinates) -> bool {
+        if to == (Coordinates { x: 1, y: 1 }) {
+            return self.move_piece(from, Coordinates { x: 3, y: 1 })
+                && self.move_piece(to, Coordinates { x: 4, y: 1 });
+        } else if to == (Coordinates { x: 1, y: 8 }) {
+            return self.move_piece(from, Coordinates { x: 7, y: 8 })
+                && self.move_piece(to, Coordinates { x: 6, y: 8 });
+        } else if to == (Coordinates { x: 8, y: 8 }) {
+            return self.move_piece(from, Coordinates { x: 3, y: 8 })
+                && self.move_piece(to, Coordinates { x: 4, y: 8 });
+        } else if to == (Coordinates { x: 8, y: 1 }) {
+            return self.move_piece(from, Coordinates { x: 7, y: 1 })
+                && self.move_piece(to, Coordinates { x: 6, y: 1 });
+        } else {
+            return false;
+        }
+    }
+
     pub fn move_piece(&mut self, from: Coordinates, to: Coordinates) -> bool {
+        if let Some(piece) = self.get_piece(to) {
+            let piece_from = self
+                .get_piece(from)
+                .expect("This should retrun Some(piece) for sure");
+
+            if piece_from.piece_color == piece.piece_color
+                && piece.piece_type == (PieceType::Rook { moved: false })
+                && piece_from.piece_type == (PieceType::King { moved: false })
+            {
+                return self.castling(from, to);
+            }
+        }
+
         let mut white_king_moved = false;
         let mut black_king_moved = false;
         let mut ok = true;
@@ -203,7 +238,14 @@ impl Board {
                         if piece.piece_type == (PieceType::Pawn { moved: false }) {
                             piece.piece_type = PieceType::Pawn { moved: true };
                         }
-                        if piece.piece_type == PieceType::King {
+                        if piece.piece_type == (PieceType::Rook { moved: false }) {
+                            piece.piece_type = PieceType::Rook { moved: true };
+                        }
+
+                        if piece.piece_type == (PieceType::King { moved: false })
+                            || piece.piece_type == (PieceType::King { moved: true })
+                        {
+                            piece.piece_type = PieceType::King { moved: true };
                             if piece.piece_color == PieceColor::White {
                                 white_king_moved = true;
                             } else {
@@ -337,7 +379,14 @@ pub fn board_spawn_system(
                 field.piece = Some(piece);
             }
 
-            commands.entity(field_id).insert(field.clone());
+            commands.entity(field_id).insert({
+                Field {
+                    entity: field_id,
+                    coordinates,
+                    color: field_color,
+                    piece: None,
+                }
+            });
             row.push(field);
             x += FIELD_SIZE;
         }
