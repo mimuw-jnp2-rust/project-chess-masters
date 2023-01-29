@@ -1,10 +1,12 @@
 use bevy::prelude::*;
 use bevy::window::WindowMode::BorderlessFullscreen;
 //use bevy_inspector_egui::quick::WorldInspectorPlugin;
+//use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use chess_masters::audio::ChessAudioPlugin;
 use chess_masters::board::*;
 use chess_masters::bot::BotPlugin;
 use chess_masters::game_over::GameOverPlugin;
+use chess_masters::game_paused::GamePausedPlugin;
 use chess_masters::main_menu::MainMenuPlugin;
 use chess_masters::ui::{GameTextures, UserInterfacePlugin};
 use chess_masters::user_input::UserInputPlugin;
@@ -45,6 +47,7 @@ fn main() {
         .add_plugin(UserInputPlugin)
         .add_plugin(MainMenuPlugin)
         .add_plugin(ChessAudioPlugin)
+        .add_plugin(GamePausedPlugin)
         .add_plugin(UserInterfacePlugin)
         .add_plugin(BotPlugin)
         .insert_resource(ClearColor(SADDLE_BROWN))
