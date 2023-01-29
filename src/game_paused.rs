@@ -1,3 +1,5 @@
+use bevy_kira_audio::AudioControl;
+
 use crate::game_over::despawn_board;
 use crate::main_menu::spawn_menu_button;
 use crate::*;
@@ -58,12 +60,14 @@ fn handle_back_to_game_button(
     >,
     pause_root: Query<Entity, With<PauseMenuRoot>>,
     mut global_state: ResMut<State<GlobalState>>,
+    audio: Res<bevy_kira_audio::prelude::Audio>,
 ) {
     for (interaction, mut color) in &mut interactions {
         match *interaction {
             Interaction::Clicked => {
                 let root_entity = pause_root.single();
                 commands.entity(root_entity).despawn_recursive();
+                audio.pause();
                 global_state.pop().unwrap();
             }
             Interaction::Hovered => {

@@ -4,6 +4,7 @@ use crate::moves::*;
 use crate::ui::GameTextures;
 use crate::*;
 use bevy::input::{mouse::*, ButtonState};
+use bevy_kira_audio::AudioControl;
 
 fn move_piece_sprite(mut transform: Mut<Transform>, from: Coordinates, to: Coordinates) {
     transform.translation.x += (to.x as f32 - from.x as f32) * FIELD_SIZE;
@@ -306,9 +307,14 @@ fn highlight_moves_on_click(
     }
 }
 
-fn pause_on_escape(keys: Res<Input<KeyCode>>, mut state: ResMut<State<GlobalState>>) {
+fn pause_on_escape(
+    keys: Res<Input<KeyCode>>,
+    mut state: ResMut<State<GlobalState>>,
+    audio: Res<bevy_kira_audio::prelude::Audio>,
+) {
     if keys.just_pressed(KeyCode::Escape) {
         state.push(GlobalState::Paused).unwrap();
+        audio.resume();
     }
 }
 
