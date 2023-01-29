@@ -246,7 +246,7 @@ fn spawn_piece(
             texture: image,
             transform: Transform {
                 translation: Vec3::new(on_window_coordinates.x, on_window_coordinates.y, 10.0),
-                scale: Vec3::new(0.3, 0.3, 1.0),
+                scale: Vec3::new(0.6, 0.6, 1.0),
                 ..default()
             },
             ..default()

@@ -17,9 +17,7 @@ pub mod moves;
 pub mod ui;
 pub mod user_input;
 
-pub const WINDOW_WIDTH: f32 = 800.0;
-pub const WINDOW_HEIGHT: f32 = 800.0;
-pub const FIELD_SIZE: f32 = 70.0;
+pub const FIELD_SIZE: f32 = 100.0;
 pub const BOARD_SIZE: usize = 8;
 pub const PLAY_AGAIN_BUTTON_WIDTH: f32 = 150.0;
 pub const PLAY_AGAIN_BUTTON_HEIGHT: f32 = 50.0;

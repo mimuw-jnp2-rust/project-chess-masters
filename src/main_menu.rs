@@ -163,7 +163,7 @@ fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
             texture: background_image,
             transform: Transform {
                 translation: Vec3::new(0.0, 0.0, 10.0),
-                scale: Vec3::new(0.65, 0.65, 1.0),
+                scale: Vec3::new(0.75, 0.75, 1.0),
                 ..default()
             },
             ..default()

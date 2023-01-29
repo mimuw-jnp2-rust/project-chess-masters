@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy::window::WindowMode::BorderlessFullscreen;
-use bevy_inspector_egui::quick::WorldInspectorPlugin;
+//use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use chess_masters::audio::ChessAudioPlugin;
 use chess_masters::board::*;
 use chess_masters::game_over::*;
@@ -28,9 +28,7 @@ fn main() {
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             window: WindowDescriptor {
                 title: "Chess!".to_string(),
-                //mode: BorderlessFullscreen,
-                height: WINDOW_HEIGHT,
-                width: WINDOW_WIDTH,
+                mode: BorderlessFullscreen,
                 ..default()
             },
             ..default()
