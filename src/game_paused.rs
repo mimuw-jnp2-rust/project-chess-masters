@@ -26,10 +26,14 @@ fn handle_exit_button(
     field_query: Query<Entity, With<Field>>,
     color_text_qury: Query<Entity, With<ColorText>>,
     fps_text_qury: Query<Entity, With<FpsText>>,
+    mut whose_turn: ResMut<State<WhoseTurn>>,
 ) {
     for (interaction, mut color) in &mut interactions {
         match *interaction {
             Interaction::Clicked => {
+                if whose_turn.current() == &WhoseTurn::Bot {
+                    whose_turn.set(WhoseTurn::Player).unwrap();
+                }
                 despawn_board(
                     &mut commands,
                     &piece_query,

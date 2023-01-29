@@ -7,6 +7,7 @@ use ui::GameTextures;
 
 pub mod audio;
 pub mod board;
+pub mod bot;
 pub mod chess_pieces;
 pub mod coordinates;
 pub mod field;
@@ -75,6 +76,8 @@ pub struct GameState {
     pub white: bool,
     pub selected_entity: Option<Entity>,
     pub winner: Option<PieceColor>,
+    pub bot_turn: bool,
+    pub vs_bot: bool,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -83,6 +86,13 @@ pub enum GlobalState {
     InGame,
     GameOver,
     Paused,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+
+pub enum WhoseTurn {
+    Bot,
+    Player,
 }
 
 pub fn get_image(piece: &Piece, game_textures: &Res<GameTextures>) -> Handle<Image> {

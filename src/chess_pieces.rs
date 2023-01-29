@@ -120,4 +120,26 @@ impl Piece {
             PieceType::Pawn { .. } => 1,
         }
     }
+
+    pub fn to_fen(&self) -> String {
+        if self.piece_color == PieceColor::White {
+            match self.piece_type {
+                PieceType::King => "K".to_string(),
+                PieceType::Queen => "Q".to_string(),
+                PieceType::Rook => "R".to_string(),
+                PieceType::Bishop => "B".to_string(),
+                PieceType::Knight => "N".to_string(),
+                PieceType::Pawn { .. } => "P".to_string(),
+            }
+        } else {
+            match self.piece_type {
+                PieceType::King => "k".to_string(),
+                PieceType::Queen => "q".to_string(),
+                PieceType::Rook => "r".to_string(),
+                PieceType::Bishop => "b".to_string(),
+                PieceType::Knight => "n".to_string(),
+                PieceType::Pawn { .. } => "p".to_string(),
+            }
+        }
+    }
 }

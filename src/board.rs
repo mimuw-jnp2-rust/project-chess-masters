@@ -7,6 +7,7 @@ pub struct Board {
     pub fields: Vec<Vec<Field>>,
     pub white_king_pos: Coordinates,
     pub black_king_pos: Coordinates,
+    full_move_number: u32,
 }
 
 fn starting_piece_from_coordinates(coordinates: Coordinates) -> Option<Piece> {
@@ -41,6 +42,7 @@ impl Board {
             fields: fields,
             white_king_pos: Coordinates { x: 5, y: 1 },
             black_king_pos: Coordinates { x: 5, y: 8 },
+            full_move_number: 1,
         }
     }
 
@@ -54,6 +56,32 @@ impl Board {
             }
             println!();
         }
+    }
+
+    pub fn to_fen(&self) -> String {
+        let mut fen = String::new();
+        for i in (0..BOARD_SIZE).rev() {
+            let mut empty_fields = 0;
+            for j in 0..BOARD_SIZE {
+                match &self.fields[i][j].piece {
+                    Some(piece) => {
+                        if empty_fields > 0 {
+                            fen.push_str(&empty_fields.to_string());
+                            empty_fields = 0;
+                        }
+                        fen.push_str(&piece.to_fen());
+                    }
+                    None => empty_fields += 1,
+                }
+            }
+            if empty_fields > 0 {
+                fen.push_str(&empty_fields.to_string());
+            }
+            if i > 0 {
+                fen.push_str("/");
+            }
+        }
+        fen + " b - - 0 " + &self.full_move_number.to_string()
     }
 
     pub fn get_field(&self, coordinates: Coordinates) -> Option<&Field> {
@@ -169,6 +197,9 @@ impl Board {
         let piece = self.remove_piece(from);
         match piece {
             Some(piece) => {
+                if piece.piece_color == PieceColor::Black {
+                    self.full_move_number += 1;
+                }
                 let field = self.get_field_mut(to);
                 match field {
                     Some(field) => {
@@ -246,7 +277,7 @@ fn spawn_piece(
             texture: image,
             transform: Transform {
                 translation: Vec3::new(on_window_coordinates.x, on_window_coordinates.y, 10.0),
-                scale: Vec3::new(0.6, 0.6, 1.0),
+                scale: Vec3::new(0.5, 0.5, 1.0),
                 ..default()
             },
             ..default()
@@ -261,7 +292,6 @@ pub fn board_spawn_system(
     mut commands: Commands,
     game_textures: Res<GameTextures>,
     mut game_state: ResMut<GameState>,
-    mut global_state: ResMut<State<GlobalState>>,
 ) {
     let start_x = (-1.0) * ((FIELD_SIZE * BOARD_SIZE as f32) / 2.0 - (FIELD_SIZE / 2.0));
     let mut x = start_x;
@@ -321,6 +351,8 @@ pub fn board_spawn_system(
         y += FIELD_SIZE;
     }
     game_state.board.fields = fields;
+    game_state.board.white_king_pos = Coordinates { x: 5, y: 1 };
+    game_state.board.black_king_pos = Coordinates { x: 5, y: 8 };
 }
 
 pub struct BoardPlugin;

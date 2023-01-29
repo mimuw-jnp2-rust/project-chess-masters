@@ -11,7 +11,7 @@ fn move_piece_sprite(mut transform: Mut<Transform>, from: Coordinates, to: Coord
     transform.translation.y += (to.y as f32 - from.y as f32) * FIELD_SIZE;
 }
 
-fn handle_piece_move(
+pub fn handle_piece_move(
     commands: &mut Commands,
     game_state: &mut ResMut<GameState>,
     piece_query: &mut Query<(&mut Handle<Image>, &mut Transform, &mut Piece)>,
@@ -20,6 +20,7 @@ fn handle_piece_move(
     clicked_coords: Coordinates,
     state: &mut ResMut<State<GlobalState>>,
     game_textures: &Res<GameTextures>,
+    whose_turn: &mut ResMut<State<WhoseTurn>>,
 ) {
     let query_item = piece_query.get_mut(selected_entity);
     let (mut image, transform, mut piece) = query_item.unwrap();
@@ -39,10 +40,11 @@ fn handle_piece_move(
         if let Some(piece) = &new_field.piece {
             commands.entity(piece.entity.unwrap()).despawn();
         }
-        new_field.piece = Some(piece.clone());
+
         if (piece.piece_type == PieceType::Pawn { moved: false }) {
             piece.piece_type = PieceType::Pawn { moved: true };
         }
+
         // if piece is a pawn and it is on the last row, promote it
         if (piece.piece_type == PieceType::Pawn { moved: true }) {
             if piece.piece_color == PieceColor::White && clicked_coords.y == 8 {
@@ -65,6 +67,7 @@ fn handle_piece_move(
                     .clone()
             }
         }
+        new_field.piece = Some(piece.clone());
 
         move_piece_sprite(transform, piece.coordinates, clicked_coords);
 
@@ -89,7 +92,20 @@ fn handle_piece_move(
             } else {
                 println!("Draw!");
             }
+            game_state.vs_bot = false;
             state.set(GlobalState::GameOver).unwrap();
+            if whose_turn.current() == &WhoseTurn::Bot {
+                whose_turn.set(WhoseTurn::Player).unwrap();
+            }
+        }
+
+        if game_state.vs_bot {
+            if game_state.bot_turn {
+                whose_turn.set(WhoseTurn::Player).unwrap();
+            } else {
+                whose_turn.set(WhoseTurn::Bot).unwrap();
+            }
+            game_state.bot_turn = !game_state.bot_turn;
         }
     }
 }
@@ -139,6 +155,7 @@ fn handle_field_click(
     piece_query: &mut Query<(&mut Handle<Image>, &mut Transform, &mut Piece)>,
     field_query: &mut Query<(&mut Sprite, &mut Field)>,
     state: &mut ResMut<State<GlobalState>>,
+    whose_turn: &mut ResMut<State<WhoseTurn>>,
 ) {
     if let Some(selected_id) = game_state.selected_entity {
         clear_board(game_state, game_textures, piece_query, field_query);
@@ -169,6 +186,7 @@ fn handle_field_click(
                 clicked_coords,
                 state,
                 game_textures,
+                whose_turn,
             );
         }
     } else {
@@ -211,37 +229,40 @@ fn handle_user_input(
     game_textures: Res<GameTextures>,
     mut game_state: ResMut<GameState>,
     mut state: ResMut<State<GlobalState>>,
+    mut whose_turn: ResMut<State<WhoseTurn>>,
 ) {
     let window = windows.get_primary().unwrap();
     let (height, width) = (window.height(), window.width());
+    if !game_state.bot_turn {
+        for event in button_evr.iter() {
+            if let ButtonState::Pressed = event.state {
+                if event.button != MouseButton::Left {
+                    continue;
+                }
 
-    for event in button_evr.iter() {
-        if let ButtonState::Pressed = event.state {
-            if event.button != MouseButton::Left {
-                continue;
-            }
+                if let Some(pos) = window.cursor_position() {
+                    let clicked_coords = mouse_pos_to_coordinates(pos.x, pos.y, width, height);
 
-            if let Some(pos) = window.cursor_position() {
-                let clicked_coords = mouse_pos_to_coordinates(pos.x, pos.y, width, height);
-
-                if game_state.board.get_field(clicked_coords).is_some() {
-                    handle_field_click(
-                        &mut commands,
-                        &mut game_state,
-                        &game_textures,
-                        clicked_coords,
-                        &mut piece_query,
-                        &mut field_query,
-                        &mut state,
-                    );
-                } else {
-                    println!("Opps, clicked outside the board");
-                    clear_board(
-                        &mut game_state,
-                        &game_textures,
-                        &mut piece_query,
-                        &mut field_query,
-                    );
+                    if game_state.board.get_field(clicked_coords).is_some() {
+                        handle_field_click(
+                            &mut commands,
+                            &mut game_state,
+                            &game_textures,
+                            clicked_coords,
+                            &mut piece_query,
+                            &mut field_query,
+                            &mut state,
+                            &mut whose_turn,
+                        );
+                    } else {
+                        println!("Opps, clicked outside the board");
+                        clear_board(
+                            &mut game_state,
+                            &game_textures,
+                            &mut piece_query,
+                            &mut field_query,
+                        );
+                    }
                 }
             }
         }
