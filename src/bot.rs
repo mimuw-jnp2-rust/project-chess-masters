@@ -5,6 +5,7 @@ use bevy::{
     tasks::{AsyncComputeTaskPool, Task},
 };
 use futures_lite::future;
+use std::io::Read;
 use std::{io::Write, process::Command};
 
 use crate::*;
@@ -99,7 +100,7 @@ fn manage_task(
     for (entity, mut task) in &mut tasks {
         if let Some(result) = future::block_on(future::poll_once(&mut task.0)) {
             let best_move = extract_coordinates_from_move(result);
-            println!("best_move: {:?}", best_move);
+            //println!("best_move: {:?}", best_move);
             move_piece(
                 &mut commands,
                 &mut piece_query,
@@ -124,7 +125,49 @@ fn get_best_move_from_stockfish(position: &str) -> String {
         .spawn()
         .expect("failed to execute stockfish");
 
-    let input = format!("position fen {}\ngo movetime 1000", position);
+    let input = format!("position fen {}\ngo movetime 500\n", position);
+    //println!("input: \n{}", input);
+
+    let stockfish_stdin = process.stdin.as_mut().expect("failed to open stdin");
+
+    stockfish_stdin
+        .write_all(input.as_bytes())
+        .expect("failed to write to stdin");
+
+    std::thread::sleep(std::time::Duration::from_secs(1));
+    //process.kill().expect("failed to kill process");
+    // send quit to stdin
+    stockfish_stdin
+        .write_all(b"quit\n")
+        .expect("failed to write to stdin");
+
+    let stockfish_stdout = process.stdout.as_mut().expect("failed to open stdout");
+
+    let mut output = String::new();
+    stockfish_stdout
+        .read_to_string(&mut output)
+        .expect("failed to read stdout");
+
+    let mut best_move = "";
+    for line in output.lines() {
+        //println!("line: {}", line);
+        if line.starts_with("bestmove") {
+            best_move = line.split_whitespace().nth(1).unwrap();
+            break;
+        }
+    }
+
+    best_move.to_string()
+}
+
+/*fn get_best_move_from_stockfish(position: &str) -> String {
+    let mut process = Command::new("stockfish")
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .spawn()
+        .expect("failed to execute stockfish");
+
+    let input = format!("position fen {}\ngo movetime 1000\n", position);
 
     let stdin = process.stdin.as_mut().expect("failed to open stdin");
     stdin
@@ -151,7 +194,7 @@ fn get_best_move_from_stockfish(position: &str) -> String {
         }
     }
     best_move.to_string()
-}
+}*/
 
 pub struct BotPlugin;
 

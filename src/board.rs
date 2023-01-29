@@ -81,7 +81,7 @@ impl Board {
                 fen.push_str("/");
             }
         }
-        fen + " b KQkq - 0 " + &self.full_move_number.to_string()
+        fen + " b - - 0 " + &self.full_move_number.to_string()
     }
 
     pub fn get_field(&self, coordinates: Coordinates) -> Option<&Field> {
