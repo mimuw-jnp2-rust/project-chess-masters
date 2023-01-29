@@ -19,8 +19,7 @@ fn spawn_task(mut commands: Commands, state: ResMut<GameState>) {
         let board_clone = state.board.clone();
         let task = thread_pool.spawn(async move {
             let position = board_clone.to_fen();
-            let res = get_best_move_from_stockfish(&position);
-            res
+            get_best_move_from_stockfish(&position)
         });
         commands.spawn(BotMoveTask(task));
     }
@@ -32,7 +31,7 @@ fn extract_coordinates_from_move(string: String) -> (Coordinates, Coordinates) {
         println!("Invalid move string: {}", string);
         panic!("Invalid move string");
     }
-    let from = string.chars().nth(0).unwrap();
+    let from = string.chars().next().unwrap();
     let from_number = string.chars().nth(1).unwrap();
     let to = string.chars().nth(2).unwrap();
     let to_number = string.chars().nth(3).unwrap();
@@ -54,6 +53,7 @@ fn extract_coordinates_from_move(string: String) -> (Coordinates, Coordinates) {
     (from, to)
 }
 
+#[allow(clippy::too_many_arguments)]
 fn move_piece(
     commands: &mut Commands,
     piece_query: &mut Query<(&mut Handle<Image>, &mut Transform, &mut Piece)>,
@@ -92,6 +92,7 @@ fn move_piece(
     println!("{}", game_state.board.to_fen());
 }
 
+#[allow(clippy::too_many_arguments)]
 fn manage_task(
     mut commands: Commands,
     mut tasks: Query<(Entity, &mut BotMoveTask)>,

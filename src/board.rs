@@ -39,7 +39,7 @@ impl Board {
     pub fn empty() -> Board {
         let fields: Vec<Vec<Field>> = Vec::new();
         Board {
-            fields: fields,
+            fields,
             white_king_pos: Coordinates { x: 5, y: 1 },
             black_king_pos: Coordinates { x: 5, y: 8 },
             full_move_number: 1,
@@ -78,7 +78,7 @@ impl Board {
                 fen.push_str(&empty_fields.to_string());
             }
             if i > 0 {
-                fen.push_str("/");
+                fen.push('/');
             }
         }
         fen + " b - - 0 " + &self.full_move_number.to_string()
@@ -122,7 +122,7 @@ impl Board {
             for field in row {
                 if let Some(some_piece) = &field.piece {
                     if some_piece.piece_color != my_color {
-                        let possible_moves = get_possible_moves(some_piece, &self, false);
+                        let possible_moves = get_possible_moves(some_piece, self, false);
                         if possible_moves.contains(king_position) {
                             return true;
                         }
@@ -130,7 +130,7 @@ impl Board {
                 }
             }
         }
-        return false;
+        false
     }
 
     pub fn no_possible_moves(&self, my_color: PieceColor) -> bool {
@@ -139,7 +139,7 @@ impl Board {
             for field in row {
                 if let Some(some_piece) = &field.piece {
                     if some_piece.piece_color == my_color {
-                        let mut possible_moves = get_possible_moves(some_piece, &self, true);
+                        let mut possible_moves = get_possible_moves(some_piece, self, true);
                         all_moves.append(&mut possible_moves);
                     }
                 }
@@ -163,20 +163,14 @@ impl Board {
         my_color: PieceColor,
     ) -> bool {
         let mut dummy_board: Board = self.clone();
-        if !dummy_board.move_piece(from.clone(), to.clone()) {
+        if !dummy_board.move_piece(*from, *to) {
             panic!("Something went wrong! Can't make a dummy move");
         }
 
-        let my_king_in_danger: bool;
         match my_color {
-            PieceColor::White => {
-                my_king_in_danger = dummy_board.king_in_danger(PieceColor::White);
-            }
-            PieceColor::Black => {
-                my_king_in_danger = dummy_board.king_in_danger(PieceColor::Black);
-            }
+            PieceColor::White => dummy_board.king_in_danger(PieceColor::White),
+            PieceColor::Black => dummy_board.king_in_danger(PieceColor::Black),
         }
-        my_king_in_danger
     }
 
     pub fn remove_piece(&mut self, coordinates: Coordinates) -> Option<Piece> {
@@ -216,11 +210,12 @@ impl Board {
                                 black_king_moved = true;
                             }
                         }
-                        if piece.piece_type == (PieceType::Pawn { moved: true }) {
-                            if piece.coordinates.y == 1 || piece.coordinates.y == 8 {
-                                piece.piece_type = PieceType::Queen;
-                            }
+                        if piece.piece_type == (PieceType::Pawn { moved: true })
+                            && (piece.coordinates.y == 1 || piece.coordinates.y == 8)
+                        {
+                            piece.piece_type = PieceType::Queen;
                         }
+
                         field.piece = Some(piece);
                     }
                     None => ok = false,

@@ -14,18 +14,16 @@ struct ExitButton;
 #[derive(Component)]
 struct PauseMenuRoot;
 
+#[allow(clippy::too_many_arguments)]
 fn handle_exit_button(
     mut commands: Commands,
-    mut interactions: Query<
-        (&Interaction, &mut BackgroundColor),
-        (With<ExitButton>, Changed<Interaction>),
-    >,
+    mut interactions: Query<(&Interaction, &mut BackgroundColor), With<ExitButton>>,
     pause_root: Query<Entity, With<PauseMenuRoot>>,
     mut global_state: ResMut<State<GlobalState>>,
     piece_query: Query<Entity, With<Piece>>,
     field_query: Query<Entity, With<Field>>,
-    color_text_qury: Query<Entity, With<ColorText>>,
-    fps_text_qury: Query<Entity, With<FpsText>>,
+    color_text_query: Query<Entity, With<ColorText>>,
+    fps_text_query: Query<Entity, With<FpsText>>,
     mut whose_turn: ResMut<State<WhoseTurn>>,
 ) {
     for (interaction, mut color) in &mut interactions {
@@ -38,8 +36,8 @@ fn handle_exit_button(
                     &mut commands,
                     &piece_query,
                     &field_query,
-                    &color_text_qury,
-                    &fps_text_qury,
+                    &color_text_query,
+                    &fps_text_query,
                 );
 
                 let root_entity = pause_root.single();
@@ -58,10 +56,7 @@ fn handle_exit_button(
 
 fn handle_back_to_game_button(
     mut commands: Commands,
-    mut interactions: Query<
-        (&Interaction, &mut BackgroundColor),
-        (With<BackButton>, Changed<Interaction>),
-    >,
+    mut interactions: Query<(&Interaction, &mut BackgroundColor), With<BackButton>>,
     pause_root: Query<Entity, With<PauseMenuRoot>>,
     mut global_state: ResMut<State<GlobalState>>,
     audio: Res<bevy_kira_audio::prelude::Audio>,

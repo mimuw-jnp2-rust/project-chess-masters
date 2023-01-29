@@ -31,10 +31,7 @@ fn despawn_menu(
 
 fn handle_start_button(
     mut commands: Commands,
-    mut interactions: Query<
-        (&Interaction, &mut BackgroundColor),
-        (With<StartButton>, Changed<Interaction>),
-    >,
+    mut interactions: Query<(&Interaction, &mut BackgroundColor), With<StartButton>>,
     menu_root: Query<Entity, With<MainMenuRoot>>,
     menu_background: Query<Entity, With<MenuBackground>>,
     mut global_state: ResMut<State<GlobalState>>,
@@ -64,10 +61,7 @@ fn handle_start_button(
 
 fn handle_bot_button(
     mut commands: Commands,
-    mut interactions: Query<
-        (&Interaction, &mut BackgroundColor),
-        (With<BotButton>, Changed<Interaction>),
-    >,
+    mut interactions: Query<(&Interaction, &mut BackgroundColor), With<BotButton>>,
     menu_root: Query<Entity, With<MainMenuRoot>>,
     menu_background: Query<Entity, With<MenuBackground>>,
     mut global_state: ResMut<State<GlobalState>>,
@@ -97,10 +91,7 @@ fn handle_bot_button(
 
 fn handle_quit_button(
     mut commands: Commands,
-    mut interactions: Query<
-        (&Interaction, &mut BackgroundColor),
-        (With<QuitButton>, Changed<Interaction>),
-    >,
+    mut interactions: Query<(&Interaction, &mut BackgroundColor), With<QuitButton>>,
     menu_root: Query<Entity, With<MainMenuRoot>>,
     menu_background: Query<Entity, With<MenuBackground>>,
     mut exit: EventWriter<AppExit>,

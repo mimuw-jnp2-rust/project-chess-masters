@@ -1,7 +1,5 @@
 use bevy::prelude::*;
-use bevy::window::WindowMode::BorderlessFullscreen;
-//use bevy_inspector_egui::quick::WorldInspectorPlugin;
-//use bevy_inspector_egui::quick::WorldInspectorPlugin;
+//use bevy::window::WindowMode::BorderlessFullscreen;
 use chess_masters::audio::ChessAudioPlugin;
 use chess_masters::board::*;
 use chess_masters::bot::BotPlugin;

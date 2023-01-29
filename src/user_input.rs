@@ -11,6 +11,7 @@ fn move_piece_sprite(mut transform: Mut<Transform>, from: Coordinates, to: Coord
     transform.translation.y += (to.y as f32 - from.y as f32) * FIELD_SIZE;
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn handle_piece_move(
     commands: &mut Commands,
     game_state: &mut ResMut<GameState>,
@@ -147,6 +148,7 @@ fn select_piece(
     handle_piece_choice(game_state, game_textures, query, entity, true);
 }
 
+#[allow(clippy::too_many_arguments)]
 fn handle_field_click(
     commands: &mut Commands,
     game_state: &mut ResMut<GameState>,
@@ -220,6 +222,7 @@ fn clear_board(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn handle_user_input(
     mut commands: Commands,
     windows: Res<Windows>,

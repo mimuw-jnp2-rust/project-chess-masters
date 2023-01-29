@@ -159,15 +159,14 @@ fn get_bishop_moves(piece: &Piece, board: &Board) -> Vec<Coordinates> {
 }
 
 pub fn get_possible_moves(piece: &Piece, board: &Board, filter_check: bool) -> Vec<Coordinates> {
-    let result;
-    match piece.piece_type {
-        PieceType::King { .. } => result = get_king_moves(piece, board),
-        PieceType::Queen { .. } => result = get_queen_moves(piece, board),
-        PieceType::Rook { .. } => result = get_rook_moves(piece, board),
-        PieceType::Bishop { .. } => result = get_bishop_moves(piece, board),
-        PieceType::Knight { .. } => result = get_knight_moves(piece, board),
-        PieceType::Pawn { .. } => result = get_pawn_moves(piece, board),
-    }
+    let result = match piece.piece_type {
+        PieceType::King { .. } => get_king_moves(piece, board),
+        PieceType::Queen { .. } => get_queen_moves(piece, board),
+        PieceType::Rook { .. } => get_rook_moves(piece, board),
+        PieceType::Bishop { .. } => get_bishop_moves(piece, board),
+        PieceType::Knight { .. } => get_knight_moves(piece, board),
+        PieceType::Pawn { .. } => get_pawn_moves(piece, board),
+    };
     if filter_check {
         result
             .into_iter()

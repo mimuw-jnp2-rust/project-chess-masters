@@ -28,12 +28,10 @@ pub fn despawn_board(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn play_again_button_clicked(
     mut commands: Commands,
-    mut interactions: Query<
-        (&Interaction, &mut BackgroundColor),
-        (With<PlayAgainButton>, Changed<Interaction>),
-    >,
+    mut interactions: Query<(&Interaction, &mut BackgroundColor), With<PlayAgainButton>>,
     mut global_state: ResMut<State<GlobalState>>,
     piece_query: Query<Entity, With<Piece>>,
     field_query: Query<Entity, With<Field>>,
@@ -103,7 +101,7 @@ pub fn spawn_text(
     let text = format!("{}{}", "GAME OVER:", winner);
     commands
         .spawn((Text2dBundle {
-            text: Text::from_section(text, text_style.clone()).with_alignment(text_alignment),
+            text: Text::from_section(text, text_style).with_alignment(text_alignment),
             transform: Transform::from_translation(Vec3::new(0., 320., 1.)),
             ..default()
         },))
