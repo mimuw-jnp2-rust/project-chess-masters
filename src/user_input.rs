@@ -28,9 +28,13 @@ fn handle_end_of_move(
 
     if game_state.vs_bot {
         if game_state.bot_turn {
-            whose_turn.set(WhoseTurn::Player).unwrap();
+            whose_turn
+                .set(WhoseTurn::Player)
+                .expect("Unexpected error while setting state");
         } else {
-            whose_turn.set(WhoseTurn::Bot).unwrap();
+            whose_turn
+                .set(WhoseTurn::Bot)
+                .expect("Unexpected error while setting state");
         }
         game_state.bot_turn = !game_state.bot_turn;
     }
@@ -42,7 +46,9 @@ fn handle_end_of_move(
         } else {
             println!("Draw!");
         }
-        state.set(GlobalState::GameOver).unwrap();
+        state
+            .set(GlobalState::GameOver)
+            .expect("Unexpected error while setting state");
     }
 }
 
@@ -57,14 +63,14 @@ fn promote_pawn(
         *image = game_textures
             .white_images_map
             .get(&PieceType::Queen)
-            .unwrap()
+            .expect("Error in getting image")
             .0
             .clone()
     } else {
         *image = game_textures
             .black_images_map
             .get(&PieceType::Queen)
-            .unwrap()
+            .expect("Error in getting image")
             .0
             .clone()
     }
@@ -121,9 +127,12 @@ pub fn handle_piece_move(
     whose_turn: &mut ResMut<State<WhoseTurn>>,
 ) {
     let query_item = piece_query.get_mut(selected_entity);
-    let (mut image, transform, mut piece) = query_item.unwrap();
+    let (mut image, transform, mut piece) = query_item.expect("Error in getting piece");
 
-    let new_field = game_state.board.get_field(clicked_coords).unwrap();
+    let new_field = game_state
+        .board
+        .get_field(clicked_coords)
+        .expect("Error in getting field");
     if let Some(new_piece) = &new_field.piece {
         if let Some(entity) = new_piece.entity {
             commands.entity(entity).despawn();
@@ -150,7 +159,8 @@ fn handle_piece_choice(
     entity: Entity,
     select: bool,
 ) {
-    let query_item = query.get_mut(entity).unwrap();
+    // panics?
+    let query_item = query.get_mut(entity).expect("Error in getting query item");
     let query_item = (query_item.0, query_item.2);
     let (mut image, mut piece) = query_item;
     piece.border = select;
@@ -191,10 +201,16 @@ fn handle_castling(
     whose_turn: &mut ResMut<State<WhoseTurn>>,
 ) {
     game_state.castling = true;
-    let rook_piece = piece_query.get_mut(rook_entity).unwrap().2;
+    let rook_piece = piece_query
+        .get_mut(rook_entity)
+        .expect("Error in getting piece")
+        .2;
     let rook_coords = rook_piece.coordinates;
 
-    let king_piece = piece_query.get_mut(king_entity).unwrap().2;
+    let king_piece = piece_query
+        .get_mut(king_entity)
+        .expect("Error in getting piece")
+        .2;
     let king_coords = king_piece.coordinates;
 
     let new_king_coords: Coordinates;
@@ -256,16 +272,30 @@ fn handle_field_click(
     if let Some(selected_id) = game_state.selected_entity {
         clear_board(game_state, game_textures, piece_query, field_query);
 
-        let clicked_field = game_state.board.get_field(clicked_coords).unwrap();
+        let clicked_field = game_state
+            .board
+            .get_field(clicked_coords)
+            .expect("Error in getting field");
 
         // if clicked field has piece and it's the same color as the player who's turn it is
         if clicked_field.piece.is_some()
-            && (clicked_field.piece.clone().unwrap().piece_color == PieceColor::White)
+            && (clicked_field
+                .piece
+                .clone()
+                .expect("Error in cloning piece")
+                .piece_color
+                == PieceColor::White)
                 == game_state.white
         {
-            let clicked_piece = clicked_field.piece.as_ref().unwrap();
-            let clicked_id = clicked_piece.entity.unwrap();
-            let selected_piece = piece_query.get_mut(selected_id).unwrap().2;
+            let clicked_piece = clicked_field
+                .piece
+                .as_ref()
+                .expect("Error in getting field ref");
+            let clicked_id = clicked_piece.entity.expect("Error in getting piece");
+            let selected_piece = piece_query
+                .get_mut(selected_id)
+                .expect("Error in getting piece")
+                .2;
 
             if clicked_id == selected_id {
                 clear_board(game_state, game_textures, piece_query, field_query);
@@ -295,7 +325,10 @@ fn handle_field_click(
                 select_piece(game_state, game_textures, piece_query, clicked_id);
             }
         } else {
-            let piece = piece_query.get_mut(selected_id).unwrap().2;
+            let piece = piece_query
+                .get_mut(selected_id)
+                .expect("Error in getting piece")
+                .2;
 
             let possible_moves = get_possible_moves(&piece, &game_state.board, true);
             if possible_moves.contains(&clicked_coords) {
@@ -313,11 +346,14 @@ fn handle_field_click(
         }
     } else {
         clear_board(game_state, game_textures, piece_query, field_query);
-        let clicked_field = game_state.board.get_field(clicked_coords).unwrap();
+        let clicked_field = game_state
+            .board
+            .get_field(clicked_coords)
+            .expect("Error in getting field");
 
         if let Some(piece) = clicked_field.piece.as_ref() {
             if (piece.piece_color == PieceColor::White) == game_state.white {
-                let clicked_id = piece.entity.unwrap();
+                let clicked_id = piece.entity.expect("Error in getting piece entity");
                 select_piece(game_state, game_textures, piece_query, clicked_id);
             }
         }
@@ -353,7 +389,7 @@ fn handle_user_input(
     mut state: ResMut<State<GlobalState>>,
     mut whose_turn: ResMut<State<WhoseTurn>>,
 ) {
-    let window = windows.get_primary().unwrap();
+    let window = windows.get_primary().expect("Error in getting windows");
     let (height, width) = (window.height(), window.width());
 
     for event in button_evr.iter() {
@@ -421,7 +457,7 @@ fn highlight_moves_on_click(
     mut field_query: Query<(&mut Sprite, &Field)>,
     game_state: Res<GameState>,
 ) {
-    let window = windows.get_primary().unwrap();
+    let window = windows.get_primary().expect("Error in getting windows");
     let (height, width) = (window.height(), window.width());
 
     for event in button_evr.iter() {
@@ -455,7 +491,9 @@ fn pause_on_escape(
     audio: Res<bevy_kira_audio::prelude::Audio>,
 ) {
     if keys.just_pressed(KeyCode::Escape) {
-        state.push(GlobalState::Paused).unwrap();
+        state
+            .push(GlobalState::Paused)
+            .expect("Error in setting state");
         audio.resume();
     }
 }
