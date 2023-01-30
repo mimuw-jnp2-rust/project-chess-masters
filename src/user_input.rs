@@ -256,7 +256,7 @@ fn handle_castling(
         game_textures,
         whose_turn,
     );
-    //game_state.white = !game_state.white;
+    //game_state.white = !game_state.white; - czemu to tu
 }
 
 fn handle_field_click(

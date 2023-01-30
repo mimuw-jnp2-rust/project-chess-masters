@@ -30,7 +30,9 @@ fn handle_exit_button(
         match *interaction {
             Interaction::Clicked => {
                 if whose_turn.current() == &WhoseTurn::Bot {
-                    whose_turn.set(WhoseTurn::Player).unwrap();
+                    whose_turn
+                        .set(WhoseTurn::Player)
+                        .expect("Error in setting state");
                 }
                 despawn_board(
                     &mut commands,
@@ -42,7 +44,9 @@ fn handle_exit_button(
 
                 let root_entity = pause_root.single();
                 commands.entity(root_entity).despawn_recursive();
-                global_state.set(GlobalState::MainMenu).unwrap();
+                global_state
+                    .set(GlobalState::MainMenu)
+                    .expect("Error in setting state");
             }
             Interaction::Hovered => {
                 *color = BURGUNDY_LIGHT.into();
@@ -67,7 +71,7 @@ fn handle_back_to_game_button(
                 let root_entity = pause_root.single();
                 commands.entity(root_entity).despawn_recursive();
                 audio.pause();
-                global_state.pop().unwrap();
+                global_state.pop().expect("Error in setting state");
             }
             Interaction::Hovered => {
                 *color = BURGUNDY_LIGHT.into();

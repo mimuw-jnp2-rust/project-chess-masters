@@ -46,7 +46,9 @@ fn handle_start_button(
                 game_state.bot_turn = false;
                 game_state.winner = None;
                 despawn_menu(&mut commands, &menu_root, &menu_background);
-                global_state.set(GlobalState::InGame).unwrap();
+                global_state
+                    .set(GlobalState::InGame)
+                    .expect("Error in setting state");
                 audio.pause().fade_out(AudioTween::default());
             }
             Interaction::Hovered => {
@@ -76,7 +78,9 @@ fn handle_bot_button(
                 game_state.bot_turn = false;
                 game_state.winner = None;
                 despawn_menu(&mut commands, &menu_root, &menu_background);
-                global_state.set(GlobalState::InGame).unwrap();
+                global_state
+                    .set(GlobalState::InGame)
+                    .expect("Error in setting state");
                 audio.pause().fade_out(AudioTween::default());
             }
             Interaction::Hovered => {
