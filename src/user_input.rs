@@ -13,16 +13,10 @@ fn move_piece_sprite(mut transform: Mut<Transform>, from: Coordinates, to: Coord
 
 fn handle_end_of_move(
     game_state: &mut ResMut<GameState>,
-    piece: &mut Piece,
     state: &mut ResMut<State<GlobalState>>,
-    clicked_coords: Coordinates,
     whose_turn: &mut ResMut<State<WhoseTurn>>,
 ) {
     game_state.white = !game_state.white; // end of move
-    let _ = &game_state
-        .board
-        .move_piece(piece.coordinates, clicked_coords);
-    piece.coordinates = clicked_coords;
 
     // check for winner or draw
     let mut color = PieceColor::White;
@@ -30,6 +24,15 @@ fn handle_end_of_move(
     if !game_state.white {
         color = PieceColor::Black;
         maybe_winner = PieceColor::White;
+    }
+
+    if game_state.vs_bot {
+        if game_state.bot_turn {
+            whose_turn.set(WhoseTurn::Player).unwrap();
+        } else {
+            whose_turn.set(WhoseTurn::Bot).unwrap();
+        }
+        game_state.bot_turn = !game_state.bot_turn;
     }
 
     if game_state.board.no_possible_moves(color) {
@@ -40,18 +43,6 @@ fn handle_end_of_move(
             println!("Draw!");
         }
         state.set(GlobalState::GameOver).unwrap();
-        if whose_turn.current() == &WhoseTurn::Bot {
-            whose_turn.set(WhoseTurn::Player).unwrap();
-        }
-    }
-
-    if game_state.vs_bot {
-        if game_state.bot_turn {
-            whose_turn.set(WhoseTurn::Player).unwrap();
-        } else {
-            whose_turn.set(WhoseTurn::Bot).unwrap();
-        }
-        game_state.bot_turn = !game_state.bot_turn;
     }
 }
 
@@ -108,6 +99,17 @@ fn check_if_piece_already_moved(piece: &mut Piece) {
     }
 }
 
+fn move_piece_on_board(
+    game_state: &mut ResMut<GameState>,
+    piece: &mut Piece,
+    clicked_coords: Coordinates,
+) {
+    let _ = &game_state
+        .board
+        .move_piece(piece.coordinates, clicked_coords);
+    piece.coordinates = clicked_coords;
+}
+
 pub fn handle_piece_move(
     commands: &mut Commands,
     game_state: &mut ResMut<GameState>,
@@ -134,8 +136,10 @@ pub fn handle_piece_move(
 
     move_piece_sprite(transform, piece.coordinates, clicked_coords);
 
+    move_piece_on_board(game_state, &mut piece, clicked_coords);
+
     if !game_state.castling {
-        handle_end_of_move(game_state, &mut piece, state, clicked_coords, whose_turn);
+        handle_end_of_move(game_state, state, whose_turn);
     }
 }
 
