@@ -13,33 +13,33 @@ use crate::*;
 #[derive(Component)]
 struct BotMoveTask(Task<String>);
 
-fn spawn_task(mut commands: Commands, state: ResMut<GameState>) {
-    if state.bot_turn {
+fn spawn_task(mut commands: Commands, game_state: ResMut<GameState>) {
+    if game_state.bot_turn {
         let thread_pool = AsyncComputeTaskPool::get();
-        let board_clone = state.board.clone();
-        let task = thread_pool.spawn(async move {
-            let position = board_clone.to_fen();
-            get_best_move_from_stockfish(&position)
-        });
+        let position = game_state.board.to_fen();
+        let task = thread_pool.spawn(async move { get_best_move_from_stockfish(&position) });
         commands.spawn(BotMoveTask(task));
     }
 }
 
 fn extract_coordinates_from_move(string: String) -> (Coordinates, Coordinates) {
-    //println!("Move: {}", string);
     if string.len() != 4 {
         println!("Invalid move string: {}", string);
         panic!("Invalid move string received from Stockfish");
     }
-    let from = string.chars().next().unwrap();
-    let from_number = string.chars().nth(1).unwrap();
-    let to = string.chars().nth(2).unwrap();
-    let to_number = string.chars().nth(3).unwrap();
+    let from = string.chars().next().expect("Invalid move string");
+    let from_number = string.chars().nth(1).expect("Invalid move string");
+    let to = string.chars().nth(2).expect("Invalid move string");
+    let to_number = string.chars().nth(3).expect("Invalid move string");
 
-    let from_first = ((from as u8 - 48) as char).to_digit(10).unwrap() as i32;
-    let from_second = from_number.to_digit(10).unwrap() as i32;
-    let to_first = ((to as u8 - 48) as char).to_digit(10).unwrap() as i32;
-    let to_second = to_number.to_digit(10).unwrap() as i32;
+    let from_first = ((from as u8 - 48) as char)
+        .to_digit(10)
+        .expect("Invalid move string") as i32;
+    let from_second = from_number.to_digit(10).expect("Invalid move string") as i32;
+    let to_first = ((to as u8 - 48) as char)
+        .to_digit(10)
+        .expect("Invalid move string") as i32;
+    let to_second = to_number.to_digit(10).expect("Invalid move string") as i32;
 
     let from = Coordinates {
         x: from_first,
@@ -53,42 +53,38 @@ fn extract_coordinates_from_move(string: String) -> (Coordinates, Coordinates) {
     (from, to)
 }
 
-#[allow(clippy::too_many_arguments)]
 fn move_piece(
     commands: &mut Commands,
     piece_query: &mut Query<(&mut Handle<Image>, &mut Transform, &mut Piece)>,
-    from: Coordinates,
-    to: Coordinates,
+    from_to: (Coordinates, Coordinates),
     game_state: &mut ResMut<GameState>,
     game_textures: &Res<GameTextures>,
     state: &mut ResMut<State<GlobalState>>,
     whose_turn: &mut ResMut<State<WhoseTurn>>,
 ) {
+    let from = from_to.0;
     let old_field = game_state
         .board
         .get_field(from)
         .expect("Stockfish returned invalid move");
-    let piece = old_field.piece.as_ref().unwrap();
-    let piece_entity = piece.entity.unwrap();
-
-    // print board
-    //println!("{}", game_state.board.to_fen());
+    let piece = old_field
+        .piece
+        .as_ref()
+        .expect("Stockfish returned invalid move");
+    let piece_entity = piece.entity.expect("Stockfish returned invalid move");
 
     handle_piece_move(
         commands,
         game_state,
         piece_query,
         piece_entity,
-        to,
+        from_to.1,
         state,
         game_textures,
         whose_turn,
     );
-
-    //println!("{}", game_state.board.to_fen());
 }
 
-#[allow(clippy::too_many_arguments)]
 fn manage_task(
     mut commands: Commands,
     mut tasks: Query<(Entity, &mut BotMoveTask)>,
@@ -101,12 +97,10 @@ fn manage_task(
     for (entity, mut task) in &mut tasks {
         if let Some(result) = future::block_on(future::poll_once(&mut task.0)) {
             let best_move = extract_coordinates_from_move(result);
-            //println!("best_move: {:?}", best_move);
             move_piece(
                 &mut commands,
                 &mut piece_query,
-                best_move.0,
-                best_move.1,
+                best_move,
                 &mut game_state,
                 &game_textures,
                 &mut global_state,
@@ -152,9 +146,8 @@ fn get_best_move_from_stockfish(position: &str) -> String {
 
     let mut best_move = "";
     for line in output.lines() {
-        //println!("line: {}", line);
         if line.starts_with("bestmove") {
-            best_move = line.split_whitespace().nth(1).unwrap();
+            best_move = line.split_whitespace().nth(1).expect("Parse error");
             break;
         }
     }

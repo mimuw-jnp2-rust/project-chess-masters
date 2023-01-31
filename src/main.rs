@@ -1,7 +1,7 @@
 use bevy::prelude::*;
-//use bevy::window::WindowMode::BorderlessFullscreen;
+use bevy::window::WindowMode::BorderlessFullscreen;
 use chess_masters::audio::ChessAudioPlugin;
-use chess_masters::board::*;
+use chess_masters::board::{Board, BoardPlugin};
 use chess_masters::bot::BotPlugin;
 use chess_masters::game_over::GameOverPlugin;
 use chess_masters::game_paused::GamePausedPlugin;
@@ -26,16 +26,19 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     });
 }
 
+fn create_window_descriptor() -> WindowDescriptor {
+    WindowDescriptor {
+        title: "Chess!".to_string(),
+        mode: BorderlessFullscreen,
+        ..default()
+    }
+}
+
 fn main() {
     App::new()
+        .insert_resource(ClearColor(SADDLE_BROWN))
         .add_plugins(DefaultPlugins.set(WindowPlugin {
-            window: WindowDescriptor {
-                title: "Chess!".to_string(),
-                width: 1920.0,
-                height: 1080.0,
-                //mode: BorderlessFullscreen,
-                ..default()
-            },
+            window: create_window_descriptor(),
             ..default()
         }))
         .add_state(GlobalState::MainMenu)
@@ -48,7 +51,6 @@ fn main() {
         .add_plugin(GamePausedPlugin)
         .add_plugin(UserInterfacePlugin)
         .add_plugin(BotPlugin)
-        .insert_resource(ClearColor(SADDLE_BROWN))
         .add_startup_system(setup)
         .run();
 }

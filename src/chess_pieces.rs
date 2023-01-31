@@ -1,7 +1,6 @@
 use crate::coordinates::*;
 use bevy::prelude::{Component, Entity};
 
-/// The color of a piece.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum PieceColor {
     White,

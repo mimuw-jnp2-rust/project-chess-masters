@@ -36,6 +36,7 @@ pub const BURGUNDY_LIGHT: Color = Color::rgb(191.0 / 255.0, 98.0 / 255.0, 98.0 /
 pub const BURGUNDY_DARK: Color = Color::rgb(118.0 / 255.0, 9.0 / 255.0, 9.0 / 255.0);
 
 pub const TRANSPARENT_GRAY: Color = Color::rgba(80.0 / 255.0, 80.0 / 255.0, 80.0 / 255.0, 0.8);
+pub const TRANSPARENT_BURGUNDY: Color = Color::rgba(118.0 / 255.0, 9.0 / 255.0, 9.0 / 255.0, 0.8);
 
 pub const FRIEND_TEXT: &str = "Play with your friend";
 pub const BOT_TEXT: &str = "Play with bot";
@@ -90,7 +91,6 @@ pub enum GlobalState {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
-
 pub enum WhoseTurn {
     Bot,
     Player,

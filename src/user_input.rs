@@ -16,7 +16,7 @@ fn handle_end_of_move(
     state: &mut ResMut<State<GlobalState>>,
     whose_turn: &mut ResMut<State<WhoseTurn>>,
 ) {
-    game_state.white = !game_state.white; // end of move
+    game_state.white = !game_state.white;
 
     // check for winner or draw
     let mut color = PieceColor::White;
@@ -26,7 +26,20 @@ fn handle_end_of_move(
         maybe_winner = PieceColor::White;
     }
 
-    if game_state.vs_bot {
+    if game_state.board.no_possible_moves(color) {
+        if game_state.board.king_in_danger(color) {
+            game_state.winner = Some(maybe_winner);
+        }
+        state
+            .set(GlobalState::GameOver)
+            .expect("Unexpected error while setting state");
+        // if it is bot turn then we need to set player turn
+        if *whose_turn.current() == WhoseTurn::Bot {
+            whose_turn
+                .set(WhoseTurn::Player)
+                .expect("Unexpected error while setting state");
+        }
+    } else if game_state.vs_bot {
         if game_state.bot_turn {
             whose_turn
                 .set(WhoseTurn::Player)
@@ -37,18 +50,6 @@ fn handle_end_of_move(
                 .expect("Unexpected error while setting state");
         }
         game_state.bot_turn = !game_state.bot_turn;
-    }
-
-    if game_state.board.no_possible_moves(color) {
-        if game_state.board.king_in_danger(color) {
-            println!("Game over!"); // change state :/
-            game_state.winner = Some(maybe_winner);
-        } else {
-            println!("Draw!");
-        }
-        state
-            .set(GlobalState::GameOver)
-            .expect("Unexpected error while setting state");
     }
 }
 
@@ -159,7 +160,9 @@ fn handle_piece_choice(
     entity: Entity,
     select: bool,
 ) {
-    // panics?
+    if !query.get_mut(entity).is_ok() {
+        return;
+    }
     let query_item = query.get_mut(entity).expect("Error in getting query item");
     let query_item = (query_item.0, query_item.2);
     let (mut image, mut piece) = query_item;
@@ -256,7 +259,6 @@ fn handle_castling(
         game_textures,
         whose_turn,
     );
-    //game_state.white = !game_state.white; - czemu to tu
 }
 
 fn handle_field_click(
@@ -389,37 +391,39 @@ fn handle_user_input(
     mut state: ResMut<State<GlobalState>>,
     mut whose_turn: ResMut<State<WhoseTurn>>,
 ) {
-    let window = windows.get_primary().expect("Error in getting windows");
-    let (height, width) = (window.height(), window.width());
+    if !game_state.vs_bot || !game_state.bot_turn {
+        let window = windows.get_primary().expect("Error in getting windows");
+        let (height, width) = (window.height(), window.width());
 
-    for event in button_evr.iter() {
-        if let ButtonState::Pressed = event.state {
-            if event.button != MouseButton::Left {
-                continue;
-            }
+        for event in button_evr.iter() {
+            if let ButtonState::Pressed = event.state {
+                if event.button != MouseButton::Left {
+                    continue;
+                }
 
-            if let Some(pos) = window.cursor_position() {
-                let clicked_coords = mouse_pos_to_coordinates(pos.x, pos.y, width, height);
+                if let Some(pos) = window.cursor_position() {
+                    let clicked_coords = mouse_pos_to_coordinates(pos.x, pos.y, width, height);
 
-                if game_state.board.get_field(clicked_coords).is_some() {
-                    handle_field_click(
-                        &mut commands,
-                        &mut game_state,
-                        &game_textures,
-                        clicked_coords,
-                        &mut piece_query,
-                        &mut field_query,
-                        &mut state,
-                        &mut whose_turn,
-                    );
-                } else {
-                    // clicked outside of the board
-                    clear_board(
-                        &mut game_state,
-                        &game_textures,
-                        &mut piece_query,
-                        &mut field_query,
-                    );
+                    if game_state.board.get_field(clicked_coords).is_some() {
+                        handle_field_click(
+                            &mut commands,
+                            &mut game_state,
+                            &game_textures,
+                            clicked_coords,
+                            &mut piece_query,
+                            &mut field_query,
+                            &mut state,
+                            &mut whose_turn,
+                        );
+                    } else {
+                        // clicked outside of the board
+                        clear_board(
+                            &mut game_state,
+                            &game_textures,
+                            &mut piece_query,
+                            &mut field_query,
+                        );
+                    }
                 }
             }
         }
@@ -459,24 +463,25 @@ fn highlight_moves_on_click(
 ) {
     let window = windows.get_primary().expect("Error in getting windows");
     let (height, width) = (window.height(), window.width());
+    if !game_state.vs_bot || !game_state.bot_turn {
+        for event in button_evr.iter() {
+            if let ButtonState::Pressed = event.state {
+                if event.button != MouseButton::Left {
+                    continue;
+                }
+                reset_fields_to_default(&mut field_query);
 
-    for event in button_evr.iter() {
-        if let ButtonState::Pressed = event.state {
-            if event.button != MouseButton::Left {
-                continue;
-            }
-            reset_fields_to_default(&mut field_query);
+                if game_state.selected_entity.is_none() {
+                    return;
+                }
 
-            if game_state.selected_entity.is_none() {
-                return;
-            }
-
-            if let Some(pos) = window.cursor_position() {
-                let clicked_coords = mouse_pos_to_coordinates(pos.x, pos.y, width, height);
-                if let Some(clicked_field) = game_state.board.get_field(clicked_coords) {
-                    if let Some(piece) = &clicked_field.piece {
-                        if (piece.piece_color == PieceColor::White) == game_state.white {
-                            highlight_fields(piece, &mut field_query, &game_state);
+                if let Some(pos) = window.cursor_position() {
+                    let clicked_coords = mouse_pos_to_coordinates(pos.x, pos.y, width, height);
+                    if let Some(clicked_field) = game_state.board.get_field(clicked_coords) {
+                        if let Some(piece) = &clicked_field.piece {
+                            if (piece.piece_color == PieceColor::White) == game_state.white {
+                                highlight_fields(piece, &mut field_query, &game_state);
+                            }
                         }
                     }
                 }

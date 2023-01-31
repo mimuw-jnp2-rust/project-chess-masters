@@ -4,7 +4,6 @@ use bevy::prelude::*;
 use std::fmt::{self, Display, Formatter};
 use std::ops::Add;
 
-#[cfg_attr(feature = "debug", derive(bevy_inspector_egui::Inspectable))]
 #[derive(Debug, Default, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Component)]
 pub struct Coordinates {
     pub x: i32,
@@ -40,31 +39,5 @@ pub fn mouse_pos_to_coordinates(x: f32, y: f32, width: f32, height: f32) -> Coor
     Coordinates {
         x: ((x - left_down_x) / FIELD_SIZE as f32).floor() as i32 + 1,
         y: ((y - left_down_y) / FIELD_SIZE as f32).floor() as i32 + 1,
-    }
-}
-
-// system prints coordinates of the button that was clicked
-#[allow(dead_code)]
-pub fn print_coordinates(
-    // mut commands: Commands,
-    button_query: Query<(Entity, &Coordinates), With<Button>>,
-    interaction_query: Query<&Interaction, Changed<Interaction>>,
-) {
-    for (entity, coordinates) in button_query.iter() {
-        if let Ok(interaction) = interaction_query.get(entity) {
-            if *interaction == Interaction::Clicked {
-                if (coordinates.x + coordinates.y) % 2 == 0 {
-                    println!(
-                        "Clicked white button at ({}, {})",
-                        coordinates.x, coordinates.y
-                    );
-                } else {
-                    println!(
-                        "Clicked black button at ({}, {})",
-                        coordinates.x, coordinates.y
-                    );
-                }
-            }
-        }
     }
 }

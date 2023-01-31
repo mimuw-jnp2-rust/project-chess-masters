@@ -252,7 +252,6 @@ pub fn get_possible_moves(piece: &Piece, board: &Board, filter_check: bool) -> V
         PieceType::Pawn { .. } => result = get_pawn_moves(piece, board),
     }
     if filter_check {
-        //println!("Result before filter: {:?}", result);
         result
             .into_iter()
             .filter(|c| !board.is_check_after_move(&piece.coordinates, c, piece.piece_color))

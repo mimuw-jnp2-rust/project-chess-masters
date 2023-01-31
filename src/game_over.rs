@@ -65,7 +65,7 @@ fn play_again_button_clicked(
                 *color = BURGUNDY_LIGHT.into();
             }
             Interaction::None => {
-                *color = BURGUNDY_DARK.into();
+                *color = TRANSPARENT_BURGUNDY.into();
             }
         }
     }
@@ -116,7 +116,7 @@ pub fn spawn_button(commands: &mut Commands, asset_server: &Res<AssetServer>) ->
                 margin: UiRect::all(Val::Percent(2.0)),
                 ..default()
             },
-            background_color: BURGUNDY_DARK.into(),
+            background_color: TRANSPARENT_BURGUNDY.into(),
             ..default()
         })
         .with_children(|commands| {

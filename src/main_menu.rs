@@ -154,7 +154,7 @@ pub fn spawn_menu_button(
         .id()
 }
 
-fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>, window: Res<Windows>) {
     let start_game_button = spawn_menu_button(&mut commands, &asset_server, FRIEND_TEXT);
     commands.entity(start_game_button).insert(StartButton);
     let bot_button = spawn_menu_button(&mut commands, &asset_server, BOT_TEXT);
@@ -162,13 +162,21 @@ fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
     let quit_button = spawn_menu_button(&mut commands, &asset_server, QUIT_TEXT);
     commands.entity(quit_button).insert(QuitButton);
 
+    let window = window.get_primary().unwrap();
+    let mut scale_x = window.width() / 2560.0;
+    let mut scale_y = window.height() / 1440.0;
+    if window.width() == 800.0 && window.height() == 600.0 {
+        scale_x = 0.75;
+        scale_y = 0.75;
+    }
+
     let background_image: Handle<Image> = asset_server.load("background.png");
     commands
         .spawn(SpriteBundle {
             texture: background_image,
             transform: Transform {
                 translation: Vec3::new(0.0, 0.0, 10.0),
-                scale: Vec3::new(0.75, 0.75, 1.0),
+                scale: Vec3::new(scale_x, scale_y, 1.0),
                 ..default()
             },
             ..default()
