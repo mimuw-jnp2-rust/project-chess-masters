@@ -119,7 +119,7 @@ impl Board {
             for field in row {
                 if let Some(some_piece) = &field.piece {
                     if some_piece.piece_color != my_color {
-                        let possible_moves = get_possible_moves(some_piece, &self, false);
+                        let possible_moves = get_possible_moves(some_piece, self, false);
                         if possible_moves.contains(&coords) {
                             return true;
                         }
@@ -134,7 +134,7 @@ impl Board {
     // it could take the king
     pub fn king_in_danger(&self, my_color: PieceColor) -> bool {
         let king_position = &self.get_king_position(my_color);
-        return self.field_in_danger(my_color, *king_position);
+        self.field_in_danger(my_color, *king_position)
     }
 
     pub fn no_possible_moves(&self, my_color: PieceColor) -> bool {
@@ -190,19 +190,19 @@ impl Board {
 
     fn castling(&mut self, from: Coordinates, to: Coordinates) -> bool {
         if to == (Coordinates { x: 1, y: 1 }) {
-            return self.move_piece(from, Coordinates { x: 3, y: 1 })
-                && self.move_piece(to, Coordinates { x: 4, y: 1 });
+            self.move_piece(from, Coordinates { x: 3, y: 1 })
+                && self.move_piece(to, Coordinates { x: 4, y: 1 })
         } else if to == (Coordinates { x: 1, y: 8 }) {
-            return self.move_piece(from, Coordinates { x: 7, y: 8 })
-                && self.move_piece(to, Coordinates { x: 6, y: 8 });
+            self.move_piece(from, Coordinates { x: 7, y: 8 })
+                && self.move_piece(to, Coordinates { x: 6, y: 8 })
         } else if to == (Coordinates { x: 8, y: 8 }) {
-            return self.move_piece(from, Coordinates { x: 3, y: 8 })
-                && self.move_piece(to, Coordinates { x: 4, y: 8 });
+            self.move_piece(from, Coordinates { x: 3, y: 8 })
+                && self.move_piece(to, Coordinates { x: 4, y: 8 })
         } else if to == (Coordinates { x: 8, y: 1 }) {
-            return self.move_piece(from, Coordinates { x: 7, y: 1 })
-                && self.move_piece(to, Coordinates { x: 6, y: 1 });
+            self.move_piece(from, Coordinates { x: 7, y: 1 })
+                && self.move_piece(to, Coordinates { x: 6, y: 1 })
         } else {
-            return false;
+            false
         }
     }
 

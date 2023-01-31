@@ -28,7 +28,7 @@ fn check_castling(
                     x: pair.0,
                     y: pair.1,
                 };
-                if let Some(_) = board.get_piece(coords) {
+                if board.get_piece(coords).is_some() {
                     return false; // piece between rook and king
                 }
             }
@@ -41,7 +41,7 @@ fn check_castling(
             }
         }
     }
-    return true;
+    true
 }
 
 // castling representation: the field where rook is standing
@@ -93,7 +93,7 @@ fn add_if_empty(dest: Coordinates, board: &Board, result: &mut Vec<Coordinates>)
         }
         return false;
     }
-    return false;
+    false
 }
 
 fn add_forward_moves(piece: &Piece, board: &Board, result: &mut Vec<Coordinates>, dir: i32) {
@@ -180,18 +180,13 @@ fn get_king_moves(piece: &Piece, board: &Board, check_castling: bool) -> Vec<Coo
             y: piece.coordinates.y + pair.1,
         });
     }
-    result = result
-        .into_iter()
-        .filter(|c| ok_king_knight_move(c, board, piece.piece_color))
-        .collect();
+    result.retain(|c| ok_king_knight_move(c, board, piece.piece_color));
 
-    if check_castling {
-        if piece.piece_type == (PieceType::King { moved: false }) {
-            check_for_castlings(board, piece.piece_color, &mut result);
-        }
+    if check_castling && piece.piece_type == (PieceType::King { moved: false }) {
+        check_for_castlings(board, piece.piece_color, &mut result);
     }
 
-    return result;
+    result
 }
 
 fn get_queen_moves(piece: &Piece, board: &Board) -> Vec<Coordinates> {
@@ -242,15 +237,14 @@ fn get_bishop_moves(piece: &Piece, board: &Board) -> Vec<Coordinates> {
 }
 
 pub fn get_possible_moves(piece: &Piece, board: &Board, filter_check: bool) -> Vec<Coordinates> {
-    let result;
-    match piece.piece_type {
-        PieceType::King { .. } => result = get_king_moves(piece, board, filter_check),
-        PieceType::Queen { .. } => result = get_queen_moves(piece, board),
-        PieceType::Rook { .. } => result = get_rook_moves(piece, board),
-        PieceType::Bishop { .. } => result = get_bishop_moves(piece, board),
-        PieceType::Knight { .. } => result = get_knight_moves(piece, board),
-        PieceType::Pawn { .. } => result = get_pawn_moves(piece, board),
-    }
+    let result = match piece.piece_type {
+        PieceType::King { .. } => get_king_moves(piece, board, filter_check),
+        PieceType::Queen { .. } => get_queen_moves(piece, board),
+        PieceType::Rook { .. } => get_rook_moves(piece, board),
+        PieceType::Bishop { .. } => get_bishop_moves(piece, board),
+        PieceType::Knight { .. } => get_knight_moves(piece, board),
+        PieceType::Pawn { .. } => get_pawn_moves(piece, board),
+    };
     if filter_check {
         result
             .into_iter()

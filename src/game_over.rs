@@ -1,4 +1,5 @@
 use crate::{field::Field, ui::*, *};
+use bevy_kira_audio::AudioControl;
 
 #[derive(Component)]
 struct PlayAgainButton;
@@ -144,6 +145,7 @@ fn spawn_game_over(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     game_state: ResMut<GameState>,
+    audio: Res<bevy_kira_audio::prelude::Audio>,
 ) {
     let play_again_button = spawn_button(&mut commands, &asset_server);
     commands.entity(play_again_button).insert(PlayAgainButton);
@@ -164,6 +166,8 @@ fn spawn_game_over(
         .insert(GameOverRoot)
         .add_child(game_over_text)
         .add_child(play_again_button);
+
+    audio.resume();
 }
 
 pub struct GameOverPlugin;

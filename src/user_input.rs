@@ -117,6 +117,7 @@ fn move_piece_on_board(
     piece.coordinates = clicked_coords;
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn handle_piece_move(
     commands: &mut Commands,
     game_state: &mut ResMut<GameState>,
@@ -160,7 +161,7 @@ fn handle_piece_choice(
     entity: Entity,
     select: bool,
 ) {
-    if !query.get_mut(entity).is_ok() {
+    if query.get_mut(entity).is_err() {
         return;
     }
     let query_item = query.get_mut(entity).expect("Error in getting query item");
@@ -193,6 +194,7 @@ fn select_piece(
     handle_piece_choice(game_state, game_textures, query, entity, true);
 }
 
+#[allow(clippy::too_many_arguments)]
 fn handle_castling(
     commands: &mut Commands,
     game_state: &mut ResMut<GameState>,
@@ -261,6 +263,7 @@ fn handle_castling(
     );
 }
 
+#[allow(clippy::too_many_arguments)]
 fn handle_field_click(
     commands: &mut Commands,
     game_state: &mut ResMut<GameState>,
@@ -380,6 +383,7 @@ fn clear_board(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn handle_user_input(
     mut commands: Commands,
     windows: Res<Windows>,
