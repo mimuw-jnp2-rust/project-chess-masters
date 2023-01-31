@@ -165,7 +165,7 @@ fn spawn_main_menu(mut commands: Commands, asset_server: Res<AssetServer>, windo
     let window = window.get_primary().unwrap();
     let mut scale_x = window.width() / 2560.0;
     let mut scale_y = window.height() / 1440.0;
-    if window.width() == 800.0 && window.height() == 600.0 {
+    if window.width() < 1000.0 || window.height() < 800.0 {
         scale_x = 0.75;
         scale_y = 0.75;
     }
