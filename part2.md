@@ -6,7 +6,7 @@ Udało nam się zaimplementować szachy, w które da się grać w dwie osoby na 
 
 ##### Czego brakuje?
 
-Dla uproszczenia pion może zamienić się tylko w hetmana, nie ma bicia w przelocie. Poza tymi szczegółami w zasadzie udało nam się osiągnąć to co zaplanowaliśmy. Komunikacja z botem jest trochę inna niż sobie wyobrażaliśmy, ale o tym w readme.md
+Dla uproszczenia pion może zamienić się tylko w hetmana, nie ma bicia w przelocie. Poza tymi szczegółami w zasadzie udało nam się osiągnąć to co zaplanowaliśmy. Komunikacja z botem jest trochę inna niż sobie wyobrażaliśmy, w readme.md jest instrukcja co zrobić by działał. Na początku chcieliśmy pobierać dane z webowego API : https://www.chessdb.cn/queryc_en/ i udało nam się to osiągnąć niestety okazało się, że API jest bardzo słabe i bardzo często nie odsyła żadnego ruchu :( Generalnie nie znaleźliśmy żadnych innych API internetowych, więc nasza aplikacja wymaga pobrania stockfisha.
 
 ##### Tutoriale i inspiracje:
 
