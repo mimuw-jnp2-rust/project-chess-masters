@@ -19,10 +19,6 @@ fn starting_piece_from_coordinates(coordinates: Coordinates) -> Option<Piece> {
         return None;
     };
 
-    if coordinates.y == 7 || coordinates.y == 8 && coordinates.x != 5 {
-        return None;
-    }
-
     let piece_type = if coordinates.y == 2 || coordinates.y == 7 {
         PieceType::Pawn { moved: false }
     } else if coordinates.x == 1 || coordinates.x == 8 {
