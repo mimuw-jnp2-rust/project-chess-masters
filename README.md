@@ -33,5 +33,7 @@ This would let us play a game against another player. This includes:
 Part II
 In the second part we're going to add more animations to the game, better interface and possibility to play with bot(optional)
 
+The plan was fully implemented.
+
 ## Libraries
 - Bevy for animations and menu screens.
